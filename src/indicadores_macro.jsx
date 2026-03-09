@@ -6,6 +6,19 @@ import {
   ComposedChart, Area
 } from "recharts";
 
+// ─── HOOK RESPONSIVO ─────────────────────────────────────────────────────────
+function useWindowWidth() {
+  const [width, setWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 390
+  );
+  useEffect(() => {
+    const handle = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+  return width;
+}
+
 // ─── PALETA ─────────────────────────────────────────────────────────────────
 const MX = {
   vino:    "#6B1737", vinoDark:"#4A0F26", vinoMid:"#8C2249",
@@ -27,7 +40,6 @@ const NAV = [
 //  DATOS ENOE REALES — Michoacán 2016–2025
 // ════════════════════════════════════════════════════════════════════════════
 
-// HOJA 1 — PEA (personas)
 const ENOE_PEA = [
   {p:"I 16",pea:1926170},{p:"II 16",pea:1954099},{p:"III 16",pea:1964710},{p:"IV 16",pea:1941072},
   {p:"I 17",pea:1919012},{p:"II 17",pea:1920656},{p:"III 17",pea:1926302},{p:"IV 17",pea:1933242},
@@ -41,7 +53,6 @@ const ENOE_PEA = [
   {p:"I 25",pea:2257524},{p:"II 25",pea:2295756},{p:"III 25",pea:2271570},{p:"IV 25",pea:2259793},
 ];
 
-// HOJA 2 — Población Ocupada total S32 (personas)
 const ENOE_S32_TOTAL = [
   {p:"I 16",total:1871618},{p:"II 16",total:1894286},{p:"III 16",total:1897251},{p:"IV 16",total:1887460},
   {p:"I 17",total:1857078},{p:"II 17",total:1861157},{p:"III 17",total:1870102},{p:"IV 17",total:1888916},
@@ -55,7 +66,6 @@ const ENOE_S32_TOTAL = [
   {p:"I 25",total:2221772},{p:"II 25",total:2255591},{p:"III 25",total:2219812},{p:"IV 25",total:2219220},
 ];
 
-// HOJA 1 — Población Ocupada (para barras apiladas)
 const ENOE_OCUP = [
   {p:"I 16",ocup:1874108},{p:"II 16",ocup:1899919},{p:"III 16",ocup:1903236},{p:"IV 16",ocup:1893806},
   {p:"I 17",ocup:1863003},{p:"II 17",ocup:1867997},{p:"III 17",ocup:1876353},{p:"IV 17",ocup:1891186},
@@ -69,7 +79,6 @@ const ENOE_OCUP = [
   {p:"I 25",ocup:2231080},{p:"II 25",ocup:2258881},{p:"III 25",ocup:2227830},{p:"IV 25",ocup:2227842},
 ];
 
-// HOJA 1 — Desocupados absolutos
 const ENOE_DESOC_ABS = [
   {p:"I 16",desoc_abs:52062},{p:"II 16",desoc_abs:54180},{p:"III 16",desoc_abs:61474},{p:"IV 16",desoc_abs:47266},
   {p:"I 17",desoc_abs:56009},{p:"II 17",desoc_abs:52659},{p:"III 17",desoc_abs:49949},{p:"IV 17",desoc_abs:42056},
@@ -83,7 +92,6 @@ const ENOE_DESOC_ABS = [
   {p:"I 25",desoc_abs:26444},{p:"II 25",desoc_abs:36875},{p:"III 25",desoc_abs:43740},{p:"IV 25",desoc_abs:31951},
 ];
 
-// HOJA 1 — Tasa de Participación (%)
 const ENOE_PART = [
   {p:"I 16",part:59.39},{p:"II 16",part:60.12},{p:"III 16",part:60.61},{p:"IV 16",part:60.17},
   {p:"I 17",part:59.35},{p:"II 17",part:58.8},{p:"III 17",part:58.82},{p:"IV 17",part:59.27},
@@ -97,7 +105,6 @@ const ENOE_PART = [
   {p:"I 25",part:60.51},{p:"II 25",part:60.65},{p:"III 25",part:60.17},{p:"IV 25",part:60.21},
 ];
 
-// HOJA 1 — Tasa de Desocupación (%)
 const ENOE_DESOC = [
   {p:"I 16",desoc:2.7},{p:"II 16",desoc:2.77},{p:"III 16",desoc:3.13},{p:"IV 16",desoc:2.44},
   {p:"I 17",desoc:2.92},{p:"II 17",desoc:2.74},{p:"III 17",desoc:2.59},{p:"IV 17",desoc:2.18},
@@ -111,7 +118,6 @@ const ENOE_DESOC = [
   {p:"I 25",desoc:1.17},{p:"II 25",desoc:1.61},{p:"III 25",desoc:1.93},{p:"IV 25",desoc:1.41},
 ];
 
-// HOJA 2 — Subsectores (Ocup. Total) — REALES del archivo
 const ENOE_S32_SUBSECTORES = [
   {p:"I 16",agric:426977,ind_ext:9638,manufactura:237075,construccion:121818,comercio:378849,restaurantes:139780,transportes:67545,serv_prof:75420,serv_soc:157130,serv_div:191181,gobierno:66205},
   {p:"II 16",agric:464165,ind_ext:10427,manufactura:235382,construccion:141025,comercio:394544,restaurantes:139391,transportes:68728,serv_prof:69358,serv_soc:134937,serv_div:176278,gobierno:60051},
@@ -154,824 +160,29 @@ const ENOE_S32_SUBSECTORES = [
   {p:"IV 25",agric:457377,ind_ext:6051,manufactura:231528,construccion:193505,comercio:482689,restaurantes:172729,transportes:74919,serv_prof:102107,serv_soc:179330,serv_div:235745,gobierno:83240},
 ];
 
-// ─── DATOS IMSS CUBOS REALES — Michoacán 2016–2026 ──────────────────────────
-// Fuente: IMSS CUBOS (PPWEB). Datos mensuales. Formato "Ene 16" = Enero 2016.
-const IMSS_PT_TOTAL = [{p:"Ene 16",tot:383765},{p:"Feb 16",tot:388661},{p:"Mar 16",tot:392199},{p:"Abr 16",tot:393602},{p:"May 16",tot:392801},{p:"Jun 16",tot:396296},{p:"Jul 16",tot:393066},{p:"Ago 16",tot:395878},{p:"Sep 16",tot:399523},{p:"Oct 16",tot:403719},{p:"Nov 16",tot:408828},{p:"Dic 16",tot:406789},{p:"Ene 17",tot:406741},{p:"Feb 17",tot:410366},{p:"Mar 17",tot:419378},{p:"Abr 17",tot:420703},{p:"May 17",tot:421186},{p:"Jun 17",tot:422606},{p:"Jul 17",tot:419987},{p:"Ago 17",tot:423412},{p:"Sep 17",tot:427972},{p:"Oct 17",tot:435403},{p:"Nov 17",tot:440013},{p:"Dic 17",tot:437859},{p:"Ene 18",tot:439901},{p:"Feb 18",tot:445749},{p:"Mar 18",tot:447632},{p:"Abr 18",tot:445800},{p:"May 18",tot:444445},{p:"Jun 18",tot:445112},{p:"Jul 18",tot:445290},{p:"Ago 18",tot:444585},{p:"Sep 18",tot:446509},{p:"Oct 18",tot:454501},{p:"Nov 18",tot:456703},{p:"Dic 18",tot:454081},{p:"Ene 19",tot:454066},{p:"Feb 19",tot:459644},{p:"Mar 19",tot:459369},{p:"Abr 19",tot:458462},{p:"May 19",tot:456145},{p:"Jun 19",tot:452159},{p:"Jul 19",tot:454458},{p:"Ago 19",tot:454628},{p:"Sep 19",tot:455797},{p:"Oct 19",tot:464231},{p:"Nov 19",tot:466606},{p:"Dic 19",tot:463598},{p:"Ene 20",tot:463431},{p:"Feb 20",tot:468015},{p:"Mar 20",tot:467532},{p:"Abr 20",tot:463661},{p:"May 20",tot:453381},{p:"Jun 20",tot:450498},{p:"Jul 20",tot:447862},{p:"Ago 20",tot:451388},{p:"Sep 20",tot:453937},{p:"Oct 20",tot:459604},{p:"Nov 20",tot:463651},{p:"Dic 20",tot:461602},{p:"Ene 21",tot:458944},{p:"Feb 21",tot:462035},{p:"Mar 21",tot:462309},{p:"Abr 21",tot:460254},{p:"May 21",tot:458518},{p:"Jun 21",tot:460645},{p:"Jul 21",tot:459348},{p:"Ago 21",tot:461649},{p:"Sep 21",tot:464742},{p:"Oct 21",tot:466916},{p:"Nov 21",tot:470114},{p:"Dic 21",tot:465270},{p:"Ene 22",tot:465152},{p:"Feb 22",tot:467596},{p:"Mar 22",tot:468910},{p:"Abr 22",tot:466191},{p:"May 22",tot:464925},{p:"Jun 22",tot:464051},{p:"Jul 22",tot:462669},{p:"Ago 22",tot:468793},{p:"Sep 22",tot:469527},{p:"Oct 22",tot:477361},{p:"Nov 22",tot:479689},{p:"Dic 22",tot:474615},{p:"Ene 23",tot:476174},{p:"Feb 23",tot:479469},{p:"Mar 23",tot:482835},{p:"Abr 23",tot:481144},{p:"May 23",tot:480918},{p:"Jun 23",tot:478147},{p:"Jul 23",tot:477574},{p:"Ago 23",tot:478548},{p:"Sep 23",tot:481809},{p:"Oct 23",tot:488069},{p:"Nov 23",tot:490970},{p:"Dic 23",tot:486480},{p:"Ene 24",tot:489878},{p:"Feb 24",tot:492055},{p:"Mar 24",tot:489862},{p:"Abr 24",tot:489833},{p:"May 24",tot:486534},{p:"Jun 24",tot:481459},{p:"Jul 24",tot:480556},{p:"Ago 24",tot:482100},{p:"Sep 24",tot:483864},{p:"Oct 24",tot:491783},{p:"Nov 24",tot:495903},{p:"Dic 24",tot:493753},{p:"Ene 25",tot:495006},{p:"Feb 25",tot:493501},{p:"Mar 25",tot:495462},{p:"Abr 25",tot:497711},{p:"May 25",tot:496594},{p:"Jun 25",tot:493114},{p:"Jul 25",tot:493725},{p:"Ago 25",tot:491366},{p:"Sep 25",tot:499134},{p:"Oct 25",tot:501469},{p:"Nov 25",tot:498624},{p:"Dic 25",tot:496049},{p:"Ene 26",tot:499842}];
-const IMSS_PT_PERM = [{p:"Ene 16",perm:319312},{p:"Feb 16",perm:322329},{p:"Mar 16",perm:324210},{p:"Abr 16",perm:327031},{p:"May 16",perm:327637},{p:"Jun 16",perm:329790},{p:"Jul 16",perm:328418},{p:"Ago 16",perm:331300},{p:"Sep 16",perm:335109},{p:"Oct 16",perm:337255},{p:"Nov 16",perm:340996},{p:"Dic 16",perm:339645},{p:"Ene 17",perm:337971},{p:"Feb 17",perm:340163},{p:"Mar 17",perm:347121},{p:"Abr 17",perm:349980},{p:"May 17",perm:352241},{p:"Jun 17",perm:353166},{p:"Jul 17",perm:350420},{p:"Ago 17",perm:354492},{p:"Sep 17",perm:358680},{p:"Oct 17",perm:362508},{p:"Nov 17",perm:363689},{p:"Dic 17",perm:362895},{p:"Ene 18",perm:362573},{p:"Feb 18",perm:366642},{p:"Mar 18",perm:367391},{p:"Abr 18",perm:365647},{p:"May 18",perm:365547},{p:"Jun 18",perm:366976},{p:"Jul 18",perm:365415},{p:"Ago 18",perm:364985},{p:"Sep 18",perm:367969},{p:"Oct 18",perm:373180},{p:"Nov 18",perm:373261},{p:"Dic 18",perm:371850},{p:"Ene 19",perm:371353},{p:"Feb 19",perm:374546},{p:"Mar 19",perm:374396},{p:"Abr 19",perm:372809},{p:"May 19",perm:372651},{p:"Jun 19",perm:371742},{p:"Jul 19",perm:369723},{p:"Ago 19",perm:371576},{p:"Sep 19",perm:373419},{p:"Oct 19",perm:378651},{p:"Nov 19",perm:380625},{p:"Dic 19",perm:378723},{p:"Ene 20",perm:377104},{p:"Feb 20",perm:380169},{p:"Mar 20",perm:380406},{p:"Abr 20",perm:377942},{p:"May 20",perm:372718},{p:"Jun 20",perm:370151},{p:"Jul 20",perm:368777},{p:"Ago 20",perm:371260},{p:"Sep 20",perm:373156},{p:"Oct 20",perm:374758},{p:"Nov 20",perm:376465},{p:"Dic 20",perm:374858},{p:"Ene 21",perm:373236},{p:"Feb 21",perm:374766},{p:"Mar 21",perm:374018},{p:"Abr 21",perm:374312},{p:"May 21",perm:374245},{p:"Jun 21",perm:374790},{p:"Jul 21",perm:380905},{p:"Ago 21",perm:382627},{p:"Sep 21",perm:385839},{p:"Oct 21",perm:387386},{p:"Nov 21",perm:389433},{p:"Dic 21",perm:386934},{p:"Ene 22",perm:385889},{p:"Feb 22",perm:386961},{p:"Mar 22",perm:387753},{p:"Abr 22",perm:387847},{p:"May 22",perm:388661},{p:"Jun 22",perm:388215},{p:"Jul 22",perm:387737},{p:"Ago 22",perm:390570},{p:"Sep 22",perm:391085},{p:"Oct 22",perm:394193},{p:"Nov 22",perm:395937},{p:"Dic 22",perm:393547},{p:"Ene 23",perm:392909},{p:"Feb 23",perm:394743},{p:"Mar 23",perm:397001},{p:"Abr 23",perm:397736},{p:"May 23",perm:398752},{p:"Jun 23",perm:398297},{p:"Jul 23",perm:396499},{p:"Ago 23",perm:398624},{p:"Sep 23",perm:401056},{p:"Oct 23",perm:404054},{p:"Nov 23",perm:405730},{p:"Dic 23",perm:402699},{p:"Ene 24",perm:402590},{p:"Feb 24",perm:404423},{p:"Mar 24",perm:404723},{p:"Abr 24",perm:405116},{p:"May 24",perm:406143},{p:"Jun 24",perm:404783},{p:"Jul 24",perm:403971},{p:"Ago 24",perm:405994},{p:"Sep 24",perm:407604},{p:"Oct 24",perm:412856},{p:"Nov 24",perm:414731},{p:"Dic 24",perm:414169},{p:"Ene 25",perm:412779},{p:"Feb 25",perm:410587},{p:"Mar 25",perm:411956},{p:"Abr 25",perm:416622},{p:"May 25",perm:418156},{p:"Jun 25",perm:417073},{p:"Jul 25",perm:417807},{p:"Ago 25",perm:416842},{p:"Sep 25",perm:422121},{p:"Oct 25",perm:421162},{p:"Nov 25",perm:418734},{p:"Dic 25",perm:416572},{p:"Ene 26",perm:417607}];
-const IMSS_PT_EV = [{p:"Ene 16",ev:64453},{p:"Feb 16",ev:66332},{p:"Mar 16",ev:67989},{p:"Abr 16",ev:66571},{p:"May 16",ev:65164},{p:"Jun 16",ev:66506},{p:"Jul 16",ev:64648},{p:"Ago 16",ev:64578},{p:"Sep 16",ev:64414},{p:"Oct 16",ev:66464},{p:"Nov 16",ev:67832},{p:"Dic 16",ev:67144},{p:"Ene 17",ev:68770},{p:"Feb 17",ev:70203},{p:"Mar 17",ev:72257},{p:"Abr 17",ev:70723},{p:"May 17",ev:68945},{p:"Jun 17",ev:69440},{p:"Jul 17",ev:69567},{p:"Ago 17",ev:68920},{p:"Sep 17",ev:69292},{p:"Oct 17",ev:72895},{p:"Nov 17",ev:76324},{p:"Dic 17",ev:74964},{p:"Ene 18",ev:77328},{p:"Feb 18",ev:79107},{p:"Mar 18",ev:80241},{p:"Abr 18",ev:80153},{p:"May 18",ev:78898},{p:"Jun 18",ev:78136},{p:"Jul 18",ev:79875},{p:"Ago 18",ev:79600},{p:"Sep 18",ev:78540},{p:"Oct 18",ev:81321},{p:"Nov 18",ev:83442},{p:"Dic 18",ev:82231},{p:"Ene 19",ev:82713},{p:"Feb 19",ev:85098},{p:"Mar 19",ev:84973},{p:"Abr 19",ev:85653},{p:"May 19",ev:83494},{p:"Jun 19",ev:80417},{p:"Jul 19",ev:84735},{p:"Ago 19",ev:83052},{p:"Sep 19",ev:82378},{p:"Oct 19",ev:85580},{p:"Nov 19",ev:85981},{p:"Dic 19",ev:84875},{p:"Ene 20",ev:86327},{p:"Feb 20",ev:87846},{p:"Mar 20",ev:87126},{p:"Abr 20",ev:85719},{p:"May 20",ev:80663},{p:"Jun 20",ev:80347},{p:"Jul 20",ev:79085},{p:"Ago 20",ev:80128},{p:"Sep 20",ev:80781},{p:"Oct 20",ev:84846},{p:"Nov 20",ev:87186},{p:"Dic 20",ev:86744},{p:"Ene 21",ev:85708},{p:"Feb 21",ev:87269},{p:"Mar 21",ev:88291},{p:"Abr 21",ev:85942},{p:"May 21",ev:84273},{p:"Jun 21",ev:85855},{p:"Jul 21",ev:78443},{p:"Ago 21",ev:79022},{p:"Sep 21",ev:78903},{p:"Oct 21",ev:79530},{p:"Nov 21",ev:80681},{p:"Dic 21",ev:78336},{p:"Ene 22",ev:79263},{p:"Feb 22",ev:80635},{p:"Mar 22",ev:81157},{p:"Abr 22",ev:78344},{p:"May 22",ev:76264},{p:"Jun 22",ev:75836},{p:"Jul 22",ev:74932},{p:"Ago 22",ev:78223},{p:"Sep 22",ev:78442},{p:"Oct 22",ev:83168},{p:"Nov 22",ev:83752},{p:"Dic 22",ev:81068},{p:"Ene 23",ev:83265},{p:"Feb 23",ev:84726},{p:"Mar 23",ev:85834},{p:"Abr 23",ev:83408},{p:"May 23",ev:82166},{p:"Jun 23",ev:79850},{p:"Jul 23",ev:81075},{p:"Ago 23",ev:79924},{p:"Sep 23",ev:80753},{p:"Oct 23",ev:84015},{p:"Nov 23",ev:85240},{p:"Dic 23",ev:83781},{p:"Ene 24",ev:87288},{p:"Feb 24",ev:87632},{p:"Mar 24",ev:85139},{p:"Abr 24",ev:84717},{p:"May 24",ev:80391},{p:"Jun 24",ev:76676},{p:"Jul 24",ev:76585},{p:"Ago 24",ev:76106},{p:"Sep 24",ev:76260},{p:"Oct 24",ev:78927},{p:"Nov 24",ev:81172},{p:"Dic 24",ev:79584},{p:"Ene 25",ev:82227},{p:"Feb 25",ev:82914},{p:"Mar 25",ev:83506},{p:"Abr 25",ev:81089},{p:"May 25",ev:78438},{p:"Jun 25",ev:76041},{p:"Jul 25",ev:75918},{p:"Ago 25",ev:74524},{p:"Sep 25",ev:77013},{p:"Oct 25",ev:80307},{p:"Nov 25",ev:79890},{p:"Dic 25",ev:79477},{p:"Ene 26",ev:82235}];
-const IMSS_PT_EV_CAMPO = [{p:"Ene 16",ev_campo:16637},{p:"Feb 16",ev_campo:17809},{p:"Mar 16",ev_campo:18629},{p:"Abr 16",ev_campo:17243},{p:"May 16",ev_campo:15356},{p:"Jun 16",ev_campo:15082},{p:"Jul 16",ev_campo:13033},{p:"Ago 16",ev_campo:15398},{p:"Sep 16",ev_campo:15928},{p:"Oct 16",ev_campo:16868},{p:"Nov 16",ev_campo:17569},{p:"Dic 16",ev_campo:19184},{p:"Ene 17",ev_campo:19920},{p:"Feb 17",ev_campo:19688},{p:"Mar 17",ev_campo:20175},{p:"Abr 17",ev_campo:18768},{p:"May 17",ev_campo:17036},{p:"Jun 17",ev_campo:16927},{p:"Jul 17",ev_campo:16822},{p:"Ago 17",ev_campo:17182},{p:"Sep 17",ev_campo:17512},{p:"Oct 17",ev_campo:20456},{p:"Nov 17",ev_campo:22482},{p:"Dic 17",ev_campo:23347},{p:"Ene 18",ev_campo:24116},{p:"Feb 18",ev_campo:24461},{p:"Mar 18",ev_campo:23700},{p:"Abr 18",ev_campo:22951},{p:"May 18",ev_campo:21280},{p:"Jun 18",ev_campo:20278},{p:"Jul 18",ev_campo:21012},{p:"Ago 18",ev_campo:21001},{p:"Sep 18",ev_campo:21988},{p:"Oct 18",ev_campo:23231},{p:"Nov 18",ev_campo:25359},{p:"Dic 18",ev_campo:25780},{p:"Ene 19",ev_campo:26186},{p:"Feb 19",ev_campo:27049},{p:"Mar 19",ev_campo:25438},{p:"Abr 19",ev_campo:25068},{p:"May 19",ev_campo:22270},{p:"Jun 19",ev_campo:19659},{p:"Jul 19",ev_campo:19930},{p:"Ago 19",ev_campo:20298},{p:"Sep 19",ev_campo:22766},{p:"Oct 19",ev_campo:25416},{p:"Nov 19",ev_campo:26531},{p:"Dic 19",ev_campo:26647},{p:"Ene 20",ev_campo:27189},{p:"Feb 20",ev_campo:27201},{p:"Mar 20",ev_campo:24672},{p:"Abr 20",ev_campo:25410},{p:"May 20",ev_campo:22171},{p:"Jun 20",ev_campo:21884},{p:"Jul 20",ev_campo:21208},{p:"Ago 20",ev_campo:22109},{p:"Sep 20",ev_campo:22026},{p:"Oct 20",ev_campo:24376},{p:"Nov 20",ev_campo:25591},{p:"Dic 20",ev_campo:26650},{p:"Ene 21",ev_campo:25758},{p:"Feb 21",ev_campo:25576},{p:"Mar 21",ev_campo:25192},{p:"Abr 21",ev_campo:23402},{p:"May 21",ev_campo:21728},{p:"Jun 21",ev_campo:22245},{p:"Jul 21",ev_campo:22251},{p:"Ago 21",ev_campo:23809},{p:"Sep 21",ev_campo:25425},{p:"Oct 21",ev_campo:25663},{p:"Nov 21",ev_campo:28532},{p:"Dic 21",ev_campo:28390},{p:"Ene 22",ev_campo:29189},{p:"Feb 22",ev_campo:30311},{p:"Mar 22",ev_campo:29594},{p:"Abr 22",ev_campo:26663},{p:"May 22",ev_campo:25288},{p:"Jun 22",ev_campo:23933},{p:"Jul 22",ev_campo:23112},{p:"Ago 22",ev_campo:25945},{p:"Sep 22",ev_campo:26613},{p:"Oct 22",ev_campo:30298},{p:"Nov 22",ev_campo:30184},{p:"Dic 22",ev_campo:28368},{p:"Ene 23",ev_campo:29117},{p:"Feb 23",ev_campo:30286},{p:"Mar 23",ev_campo:30595},{p:"Abr 23",ev_campo:27620},{p:"May 23",ev_campo:26111},{p:"Jun 23",ev_campo:23667},{p:"Jul 23",ev_campo:24085},{p:"Ago 23",ev_campo:24626},{p:"Sep 23",ev_campo:25977},{p:"Oct 23",ev_campo:27570},{p:"Nov 23",ev_campo:28459},{p:"Dic 23",ev_campo:27827},{p:"Ene 24",ev_campo:30231},{p:"Feb 24",ev_campo:30101},{p:"Mar 24",ev_campo:27533},{p:"Abr 24",ev_campo:26696},{p:"May 24",ev_campo:23468},{p:"Jun 24",ev_campo:21505},{p:"Jul 24",ev_campo:20184},{p:"Ago 24",ev_campo:20302},{p:"Sep 24",ev_campo:21349},{p:"Oct 24",ev_campo:23842},{p:"Nov 24",ev_campo:25455},{p:"Dic 24",ev_campo:25525},{p:"Ene 25",ev_campo:27284},{p:"Feb 25",ev_campo:27377},{p:"Mar 25",ev_campo:26900},{p:"Abr 25",ev_campo:24531},{p:"May 25",ev_campo:22403},{p:"Jun 25",ev_campo:20574},{p:"Jul 25",ev_campo:19478},{p:"Ago 25",ev_campo:19423},{p:"Sep 25",ev_campo:20760},{p:"Oct 25",ev_campo:22127},{p:"Nov 25",ev_campo:22647},{p:"Dic 25",ev_campo:23787},{p:"Ene 26",ev_campo:25470}];
-const IMSS_PT_EV_URB = [{p:"Ene 16",ev_urb:47816},{p:"Feb 16",ev_urb:48523},{p:"Mar 16",ev_urb:49360},{p:"Abr 16",ev_urb:49328},{p:"May 16",ev_urb:49808},{p:"Jun 16",ev_urb:51424},{p:"Jul 16",ev_urb:51615},{p:"Ago 16",ev_urb:49180},{p:"Sep 16",ev_urb:48486},{p:"Oct 16",ev_urb:49596},{p:"Nov 16",ev_urb:50263},{p:"Dic 16",ev_urb:47960},{p:"Ene 17",ev_urb:48850},{p:"Feb 17",ev_urb:50515},{p:"Mar 17",ev_urb:52082},{p:"Abr 17",ev_urb:51955},{p:"May 17",ev_urb:51909},{p:"Jun 17",ev_urb:52513},{p:"Jul 17",ev_urb:52745},{p:"Ago 17",ev_urb:51738},{p:"Sep 17",ev_urb:51780},{p:"Oct 17",ev_urb:52439},{p:"Nov 17",ev_urb:53842},{p:"Dic 17",ev_urb:51617},{p:"Ene 18",ev_urb:53212},{p:"Feb 18",ev_urb:54646},{p:"Mar 18",ev_urb:56541},{p:"Abr 18",ev_urb:57202},{p:"May 18",ev_urb:57618},{p:"Jun 18",ev_urb:57858},{p:"Jul 18",ev_urb:58863},{p:"Ago 18",ev_urb:58599},{p:"Sep 18",ev_urb:56552},{p:"Oct 18",ev_urb:58090},{p:"Nov 18",ev_urb:58083},{p:"Dic 18",ev_urb:56451},{p:"Ene 19",ev_urb:56527},{p:"Feb 19",ev_urb:58049},{p:"Mar 19",ev_urb:59535},{p:"Abr 19",ev_urb:60585},{p:"May 19",ev_urb:61224},{p:"Jun 19",ev_urb:60758},{p:"Jul 19",ev_urb:64805},{p:"Ago 19",ev_urb:62754},{p:"Sep 19",ev_urb:59612},{p:"Oct 19",ev_urb:60164},{p:"Nov 19",ev_urb:59450},{p:"Dic 19",ev_urb:58228},{p:"Ene 20",ev_urb:59138},{p:"Feb 20",ev_urb:60645},{p:"Mar 20",ev_urb:62454},{p:"Abr 20",ev_urb:60309},{p:"May 20",ev_urb:58492},{p:"Jun 20",ev_urb:58463},{p:"Jul 20",ev_urb:57877},{p:"Ago 20",ev_urb:58019},{p:"Sep 20",ev_urb:58755},{p:"Oct 20",ev_urb:60470},{p:"Nov 20",ev_urb:61595},{p:"Dic 20",ev_urb:60094},{p:"Ene 21",ev_urb:59950},{p:"Feb 21",ev_urb:61693},{p:"Mar 21",ev_urb:63099},{p:"Abr 21",ev_urb:62540},{p:"May 21",ev_urb:62545},{p:"Jun 21",ev_urb:63610},{p:"Jul 21",ev_urb:56192},{p:"Ago 21",ev_urb:55213},{p:"Sep 21",ev_urb:53478},{p:"Oct 21",ev_urb:53867},{p:"Nov 21",ev_urb:52149},{p:"Dic 21",ev_urb:49946},{p:"Ene 22",ev_urb:50074},{p:"Feb 22",ev_urb:50324},{p:"Mar 22",ev_urb:51563},{p:"Abr 22",ev_urb:51681},{p:"May 22",ev_urb:50976},{p:"Jun 22",ev_urb:51903},{p:"Jul 22",ev_urb:51820},{p:"Ago 22",ev_urb:52278},{p:"Sep 22",ev_urb:51829},{p:"Oct 22",ev_urb:52870},{p:"Nov 22",ev_urb:53568},{p:"Dic 22",ev_urb:52700},{p:"Ene 23",ev_urb:54148},{p:"Feb 23",ev_urb:54440},{p:"Mar 23",ev_urb:55239},{p:"Abr 23",ev_urb:55788},{p:"May 23",ev_urb:56055},{p:"Jun 23",ev_urb:56183},{p:"Jul 23",ev_urb:56990},{p:"Ago 23",ev_urb:55298},{p:"Sep 23",ev_urb:54776},{p:"Oct 23",ev_urb:56445},{p:"Nov 23",ev_urb:56781},{p:"Dic 23",ev_urb:55954},{p:"Ene 24",ev_urb:57057},{p:"Feb 24",ev_urb:57531},{p:"Mar 24",ev_urb:57606},{p:"Abr 24",ev_urb:58021},{p:"May 24",ev_urb:56923},{p:"Jun 24",ev_urb:55171},{p:"Jul 24",ev_urb:56401},{p:"Ago 24",ev_urb:55804},{p:"Sep 24",ev_urb:54911},{p:"Oct 24",ev_urb:55085},{p:"Nov 24",ev_urb:55717},{p:"Dic 24",ev_urb:54059},{p:"Ene 25",ev_urb:54943},{p:"Feb 25",ev_urb:55537},{p:"Mar 25",ev_urb:56606},{p:"Abr 25",ev_urb:56558},{p:"May 25",ev_urb:56035},{p:"Jun 25",ev_urb:55467},{p:"Jul 25",ev_urb:56440},{p:"Ago 25",ev_urb:55101},{p:"Sep 25",ev_urb:56253},{p:"Oct 25",ev_urb:58180},{p:"Nov 25",ev_urb:57243},{p:"Dic 25",ev_urb:55690},{p:"Ene 26",ev_urb:56765}];
-const IMSS_PT_PERM_CAMPO = [{p:"Ene 16",perm_campo:20878},{p:"Feb 16",perm_campo:21389},{p:"Mar 16",perm_campo:21576},{p:"Abr 16",perm_campo:22212},{p:"May 16",perm_campo:21741},{p:"Jun 16",perm_campo:21795},{p:"Jul 16",perm_campo:21120},{p:"Ago 16",perm_campo:22288},{p:"Sep 16",perm_campo:23697},{p:"Oct 16",perm_campo:24130},{p:"Nov 16",perm_campo:24872},{p:"Dic 16",perm_campo:25240},{p:"Ene 17",perm_campo:25227},{p:"Feb 17",perm_campo:25493},{p:"Mar 17",perm_campo:29661},{p:"Abr 17",perm_campo:30196},{p:"May 17",perm_campo:32029},{p:"Jun 17",perm_campo:30516},{p:"Jul 17",perm_campo:28442},{p:"Ago 17",perm_campo:31506},{p:"Sep 17",perm_campo:33309},{p:"Oct 17",perm_campo:34474},{p:"Nov 17",perm_campo:34434},{p:"Dic 17",perm_campo:34579},{p:"Ene 18",perm_campo:34902},{p:"Feb 18",perm_campo:36027},{p:"Mar 18",perm_campo:35788},{p:"Abr 18",perm_campo:33374},{p:"May 18",perm_campo:33463},{p:"Jun 18",perm_campo:33294},{p:"Jul 18",perm_campo:32566},{p:"Ago 18",perm_campo:31707},{p:"Sep 18",perm_campo:33068},{p:"Oct 18",perm_campo:35886},{p:"Nov 18",perm_campo:34229},{p:"Dic 18",perm_campo:34516},{p:"Ene 19",perm_campo:34949},{p:"Feb 19",perm_campo:36114},{p:"Mar 19",perm_campo:35125},{p:"Abr 19",perm_campo:33837},{p:"May 19",perm_campo:33382},{p:"Jun 19",perm_campo:33198},{p:"Jul 19",perm_campo:31865},{p:"Ago 19",perm_campo:32193},{p:"Sep 19",perm_campo:33459},{p:"Oct 19",perm_campo:35274},{p:"Nov 19",perm_campo:34711},{p:"Dic 19",perm_campo:35675},{p:"Ene 20",perm_campo:35059},{p:"Feb 20",perm_campo:34910},{p:"Mar 20",perm_campo:35304},{p:"Abr 20",perm_campo:35719},{p:"May 20",perm_campo:33953},{p:"Jun 20",perm_campo:33357},{p:"Jul 20",perm_campo:32800},{p:"Ago 20",perm_campo:34408},{p:"Sep 20",perm_campo:35488},{p:"Oct 20",perm_campo:36189},{p:"Nov 20",perm_campo:36294},{p:"Dic 20",perm_campo:35506},{p:"Ene 21",perm_campo:35818},{p:"Feb 21",perm_campo:35678},{p:"Mar 21",perm_campo:34939},{p:"Abr 21",perm_campo:34540},{p:"May 21",perm_campo:34223},{p:"Jun 21",perm_campo:33909},{p:"Jul 21",perm_campo:32898},{p:"Ago 21",perm_campo:33934},{p:"Sep 21",perm_campo:35956},{p:"Oct 21",perm_campo:37173},{p:"Nov 21",perm_campo:37766},{p:"Dic 21",perm_campo:37097},{p:"Ene 22",perm_campo:36880},{p:"Feb 22",perm_campo:36724},{p:"Mar 22",perm_campo:36560},{p:"Abr 22",perm_campo:36279},{p:"May 22",perm_campo:35658},{p:"Jun 22",perm_campo:35066},{p:"Jul 22",perm_campo:35218},{p:"Ago 22",perm_campo:35902},{p:"Sep 22",perm_campo:35387},{p:"Oct 22",perm_campo:35662},{p:"Nov 22",perm_campo:35765},{p:"Dic 22",perm_campo:35305},{p:"Ene 23",perm_campo:35497},{p:"Feb 23",perm_campo:35130},{p:"Mar 23",perm_campo:34857},{p:"Abr 23",perm_campo:34622},{p:"May 23",perm_campo:33930},{p:"Jun 23",perm_campo:33392},{p:"Jul 23",perm_campo:32669},{p:"Ago 23",perm_campo:33658},{p:"Sep 23",perm_campo:34218},{p:"Oct 23",perm_campo:34457},{p:"Nov 23",perm_campo:34200},{p:"Dic 23",perm_campo:34065},{p:"Ene 24",perm_campo:34162},{p:"Feb 24",perm_campo:34092},{p:"Mar 24",perm_campo:33790},{p:"Abr 24",perm_campo:32643},{p:"May 24",perm_campo:32168},{p:"Jun 24",perm_campo:31362},{p:"Jul 24",perm_campo:31254},{p:"Ago 24",perm_campo:31450},{p:"Sep 24",perm_campo:31658},{p:"Oct 24",perm_campo:30493},{p:"Nov 24",perm_campo:30870},{p:"Dic 24",perm_campo:30534},{p:"Ene 25",perm_campo:30657},{p:"Feb 25",perm_campo:30653},{p:"Mar 25",perm_campo:30130},{p:"Abr 25",perm_campo:30265},{p:"May 25",perm_campo:29691},{p:"Jun 25",perm_campo:29376},{p:"Jul 25",perm_campo:29789},{p:"Ago 25",perm_campo:29737},{p:"Sep 25",perm_campo:29703},{p:"Oct 25",perm_campo:28446},{p:"Nov 25",perm_campo:28739},{p:"Dic 25",perm_campo:29166},{p:"Ene 26",perm_campo:29442}];
-const IMSS_PT_PERM_URB = [{p:"Ene 16",perm_urb:298434},{p:"Feb 16",perm_urb:300940},{p:"Mar 16",perm_urb:302634},{p:"Abr 16",perm_urb:304819},{p:"May 16",perm_urb:305896},{p:"Jun 16",perm_urb:307995},{p:"Jul 16",perm_urb:307298},{p:"Ago 16",perm_urb:309012},{p:"Sep 16",perm_urb:311412},{p:"Oct 16",perm_urb:313125},{p:"Nov 16",perm_urb:316124},{p:"Dic 16",perm_urb:314405},{p:"Ene 17",perm_urb:312744},{p:"Feb 17",perm_urb:314670},{p:"Mar 17",perm_urb:317460},{p:"Abr 17",perm_urb:319784},{p:"May 17",perm_urb:320212},{p:"Jun 17",perm_urb:322650},{p:"Jul 17",perm_urb:321978},{p:"Ago 17",perm_urb:322986},{p:"Sep 17",perm_urb:325371},{p:"Oct 17",perm_urb:328034},{p:"Nov 17",perm_urb:329255},{p:"Dic 17",perm_urb:328316},{p:"Ene 18",perm_urb:327671},{p:"Feb 18",perm_urb:330615},{p:"Mar 18",perm_urb:331603},{p:"Abr 18",perm_urb:332273},{p:"May 18",perm_urb:332084},{p:"Jun 18",perm_urb:333682},{p:"Jul 18",perm_urb:332849},{p:"Ago 18",perm_urb:333278},{p:"Sep 18",perm_urb:334901},{p:"Oct 18",perm_urb:337294},{p:"Nov 18",perm_urb:339032},{p:"Dic 18",perm_urb:337334},{p:"Ene 19",perm_urb:336404},{p:"Feb 19",perm_urb:338432},{p:"Mar 19",perm_urb:339271},{p:"Abr 19",perm_urb:338972},{p:"May 19",perm_urb:339269},{p:"Jun 19",perm_urb:338544},{p:"Jul 19",perm_urb:337858},{p:"Ago 19",perm_urb:339383},{p:"Sep 19",perm_urb:339960},{p:"Oct 19",perm_urb:343377},{p:"Nov 19",perm_urb:345914},{p:"Dic 19",perm_urb:343048},{p:"Ene 20",perm_urb:342045},{p:"Feb 20",perm_urb:345259},{p:"Mar 20",perm_urb:345102},{p:"Abr 20",perm_urb:342223},{p:"May 20",perm_urb:338765},{p:"Jun 20",perm_urb:336794},{p:"Jul 20",perm_urb:335977},{p:"Ago 20",perm_urb:336852},{p:"Sep 20",perm_urb:337668},{p:"Oct 20",perm_urb:338569},{p:"Nov 20",perm_urb:340171},{p:"Dic 20",perm_urb:339352},{p:"Ene 21",perm_urb:337418},{p:"Feb 21",perm_urb:339088},{p:"Mar 21",perm_urb:339079},{p:"Abr 21",perm_urb:339772},{p:"May 21",perm_urb:340022},{p:"Jun 21",perm_urb:340881},{p:"Jul 21",perm_urb:348007},{p:"Ago 21",perm_urb:348693},{p:"Sep 21",perm_urb:349883},{p:"Oct 21",perm_urb:350213},{p:"Nov 21",perm_urb:351667},{p:"Dic 21",perm_urb:349837},{p:"Ene 22",perm_urb:349009},{p:"Feb 22",perm_urb:350237},{p:"Mar 22",perm_urb:351193},{p:"Abr 22",perm_urb:351568},{p:"May 22",perm_urb:353003},{p:"Jun 22",perm_urb:353149},{p:"Jul 22",perm_urb:352519},{p:"Ago 22",perm_urb:354668},{p:"Sep 22",perm_urb:355698},{p:"Oct 22",perm_urb:358531},{p:"Nov 22",perm_urb:360172},{p:"Dic 22",perm_urb:358242},{p:"Ene 23",perm_urb:357412},{p:"Feb 23",perm_urb:359613},{p:"Mar 23",perm_urb:362144},{p:"Abr 23",perm_urb:363114},{p:"May 23",perm_urb:364822},{p:"Jun 23",perm_urb:364905},{p:"Jul 23",perm_urb:363830},{p:"Ago 23",perm_urb:364966},{p:"Sep 23",perm_urb:366838},{p:"Oct 23",perm_urb:369597},{p:"Nov 23",perm_urb:371530},{p:"Dic 23",perm_urb:368634},{p:"Ene 24",perm_urb:368428},{p:"Feb 24",perm_urb:369680},{p:"Mar 24",perm_urb:370933},{p:"Abr 24",perm_urb:372473},{p:"May 24",perm_urb:373975},{p:"Jun 24",perm_urb:373421},{p:"Jul 24",perm_urb:372717},{p:"Ago 24",perm_urb:374544},{p:"Sep 24",perm_urb:375946},{p:"Oct 24",perm_urb:382363},{p:"Nov 24",perm_urb:383861},{p:"Dic 24",perm_urb:383635},{p:"Ene 25",perm_urb:382122},{p:"Feb 25",perm_urb:379934},{p:"Mar 25",perm_urb:381826},{p:"Abr 25",perm_urb:386357},{p:"May 25",perm_urb:388465},{p:"Jun 25",perm_urb:387697},{p:"Jul 25",perm_urb:388018},{p:"Ago 25",perm_urb:387105},{p:"Sep 25",perm_urb:392418},{p:"Oct 25",perm_urb:392716},{p:"Nov 25",perm_urb:389995},{p:"Dic 25",perm_urb:387406},{p:"Ene 26",perm_urb:388165}];
-
-// ─── SECTORES (ilustrativos) ─────────────────────────────────────────────────
-
-// ════════════════════════════════════════════════════════════════════════════
-//  DATOS ENOE — Sección 4.1 Trabajadores subordinados y remunerados
-// ════════════════════════════════════════════════════════════════════════════
-
-const ENOE_S41_GRANDES = [
-  {
-    "p": "I 16",
-    "primario": 238190,
-    "secundario": 239127,
-    "terciario": 679298
-  },
-  {
-    "p": "II 16",
-    "primario": 268196,
-    "secundario": 249909,
-    "terciario": 633653
-  },
-  {
-    "p": "III 16",
-    "primario": 231184,
-    "secundario": 242542,
-    "terciario": 659751
-  },
-  {
-    "p": "IV 16",
-    "primario": 238951,
-    "secundario": 241389,
-    "terciario": 668370
-  },
-  {
-    "p": "I 17",
-    "primario": 229040,
-    "secundario": 236518,
-    "terciario": 715542
-  },
-  {
-    "p": "II 17",
-    "primario": 236306,
-    "secundario": 243817,
-    "terciario": 666021
-  },
-  {
-    "p": "III 17",
-    "primario": 240209,
-    "secundario": 252801,
-    "terciario": 669493
-  },
-  {
-    "p": "IV 17",
-    "primario": 272652,
-    "secundario": 242474,
-    "terciario": 669950
-  },
-  {
-    "p": "I 18",
-    "primario": 280958,
-    "secundario": 259010,
-    "terciario": 683147
-  },
-  {
-    "p": "II 18",
-    "primario": 279107,
-    "secundario": 260500,
-    "terciario": 689437
-  },
-  {
-    "p": "III 18",
-    "primario": 252834,
-    "secundario": 269141,
-    "terciario": 707679
-  },
-  {
-    "p": "IV 18",
-    "primario": 259881,
-    "secundario": 237619,
-    "terciario": 738178
-  },
-  {
-    "p": "I 19",
-    "primario": 305348,
-    "secundario": 260599,
-    "terciario": 743060
-  },
-  {
-    "p": "II 19",
-    "primario": 319126,
-    "secundario": 305909,
-    "terciario": 703415
-  },
-  {
-    "p": "III 19",
-    "primario": 281725,
-    "secundario": 326586,
-    "terciario": 691383
-  },
-  {
-    "p": "IV 19",
-    "primario": 285098,
-    "secundario": 278285,
-    "terciario": 734854
-  },
-  {
-    "p": "I 20",
-    "primario": 312006,
-    "secundario": 281189,
-    "terciario": 739443
-  },
-  {
-    "p": "III 20",
-    "primario": 233856,
-    "secundario": 223935,
-    "terciario": 719936
-  },
-  {
-    "p": "IV 20",
-    "primario": 223728,
-    "secundario": 258339,
-    "terciario": 794764
-  },
-  {
-    "p": "I 21",
-    "primario": 348057,
-    "secundario": 295382,
-    "terciario": 677662
-  },
-  {
-    "p": "II 21",
-    "primario": 286353,
-    "secundario": 286636,
-    "terciario": 766612
-  },
-  {
-    "p": "III 21",
-    "primario": 286913,
-    "secundario": 278077,
-    "terciario": 819412
-  },
-  {
-    "p": "IV 21",
-    "primario": 292964,
-    "secundario": 268411,
-    "terciario": 843815
-  },
-  {
-    "p": "I 22",
-    "primario": 276128,
-    "secundario": 294091,
-    "terciario": 838655
-  },
-  {
-    "p": "II 22",
-    "primario": 279570,
-    "secundario": 341006,
-    "terciario": 833229
-  },
-  {
-    "p": "III 22",
-    "primario": 302224,
-    "secundario": 311911,
-    "terciario": 814493
-  },
-  {
-    "p": "IV 22",
-    "primario": 300010,
-    "secundario": 322122,
-    "terciario": 793271
-  },
-  {
-    "p": "I 23",
-    "primario": 339422,
-    "secundario": 287420,
-    "terciario": 819651
-  },
-  {
-    "p": "II 23",
-    "primario": 317673,
-    "secundario": 315359,
-    "terciario": 807716
-  },
-  {
-    "p": "III 23",
-    "primario": 333151,
-    "secundario": 317491,
-    "terciario": 855677
-  },
-  {
-    "p": "IV 23",
-    "primario": 335521,
-    "secundario": 300450,
-    "terciario": 860188
-  },
-  {
-    "p": "I 24",
-    "primario": 356478,
-    "secundario": 295583,
-    "terciario": 871669
-  },
-  {
-    "p": "II 24",
-    "primario": 277285,
-    "secundario": 316590,
-    "terciario": 902902
-  },
-  {
-    "p": "III 24",
-    "primario": 263967,
-    "secundario": 288172,
-    "terciario": 862081
-  },
-  {
-    "p": "IV 24",
-    "primario": 252815,
-    "secundario": 300522,
-    "terciario": 892859
-  },
-  {
-    "p": "I 25",
-    "primario": 299983,
-    "secundario": 314832,
-    "terciario": 888684
-  },
-  {
-    "p": "II 25",
-    "primario": 248133,
-    "secundario": 335635,
-    "terciario": 900729
-  },
-  {
-    "p": "III 25",
-    "primario": 259296,
-    "secundario": 336953,
-    "terciario": 914669
-  },
-  {
-    "p": "IV 25",
-    "primario": 305777,
-    "secundario": 301930,
-    "terciario": 909301
-  }
+// ─── DATOS IMSS ──────────────────────────────────────────────────────────────
+const IMSS_S = [
+  {p:"Ene 23",tot:374200,perm:298000,ev:76200,camp:12400,urb:63800,pH:190720,pM:107280},
+  {p:"Mar 23",tot:376800,perm:299500,ev:77300,camp:13100,urb:64200,pH:191680,pM:107820},
+  {p:"May 23",tot:379400,perm:301000,ev:78400,camp:14200,urb:64200,pH:192640,pM:108360},
+  {p:"Jul 23",tot:381200,perm:302800,ev:78400,camp:13800,urb:64600,pH:193792,pM:109008},
+  {p:"Sep 23",tot:383600,perm:304200,ev:79400,camp:13200,urb:66200,pH:194688,pM:109512},
+  {p:"Nov 23",tot:385100,perm:305800,ev:79300,camp:12900,urb:66400,pH:195712,pM:110088},
+  {p:"Ene 24",tot:382400,perm:304500,ev:77900,camp:12500,urb:65400,pH:194880,pM:109620},
+  {p:"Mar 24",tot:386700,perm:307200,ev:79500,camp:13500,urb:66000,pH:196608,pM:110592},
+  {p:"May 24",tot:389300,perm:309100,ev:80200,camp:14800,urb:65400,pH:197824,pM:111276},
+  {p:"Jul 24",tot:391500,perm:310800,ev:80700,camp:14200,urb:66500,pH:198912,pM:111888},
+  {p:"Sep 24",tot:393200,perm:312400,ev:80800,camp:13600,urb:67200,pH:199936,pM:112464},
+  {p:"Dic 24",tot:393600,perm:313000,ev:80600,camp:13200,urb:67400,pH:200320,pM:112680},
+];
+const IMSS_KPI = [
+  {label:"Asegurados Vigentes",valor:393600,fmt:"k",delta:"+8,500",dDir:"pos",nota:"Trabajadores IMSS activos",color:MX.vino},
+  {label:"Permanentes",valor:313000,fmt:"k",delta:"+7,200",dDir:"pos",nota:"Con contrato permanente",color:MX.vinoMid},
+  {label:"Eventuales",valor:80600,fmt:"k",delta:"+1,300",dDir:"pos",nota:"Eventuales urbanos + campo",color:MX.rosa},
+  {label:"SBC Promedio",valor:505,fmt:"$",delta:"+5.2%",dDir:"pos",nota:"Salario Base de Cotización (dic 24)",color:MX.vino},
 ];
 
-const ENOE_S41_SUBSECTORES = [
-  {
-    "p": "I 16",
-    "agric": 238190,
-    "ind_ext": 9494,
-    "manufactura": 145963,
-    "construccion": 83670,
-    "comercio": 181104,
-    "restaurantes": 51376,
-    "transportes": 54736,
-    "serv_prof": 52443,
-    "serv_soc": 142412,
-    "serv_div": 131118,
-    "gobierno": 66109
-  },
-  {
-    "p": "II 16",
-    "agric": 268196,
-    "ind_ext": 10427,
-    "manufactura": 139054,
-    "construccion": 100428,
-    "comercio": 174058,
-    "restaurantes": 47196,
-    "transportes": 53541,
-    "serv_prof": 44148,
-    "serv_soc": 124645,
-    "serv_div": 131220,
-    "gobierno": 58845
-  },
-  {
-    "p": "III 16",
-    "agric": 231184,
-    "ind_ext": 8603,
-    "manufactura": 138035,
-    "construccion": 95904,
-    "comercio": 170470,
-    "restaurantes": 57577,
-    "transportes": 51646,
-    "serv_prof": 50583,
-    "serv_soc": 123861,
-    "serv_div": 138226,
-    "gobierno": 67388
-  },
-  {
-    "p": "IV 16",
-    "agric": 238951,
-    "ind_ext": 9510,
-    "manufactura": 128849,
-    "construccion": 103030,
-    "comercio": 183601,
-    "restaurantes": 55874,
-    "transportes": 49056,
-    "serv_prof": 45620,
-    "serv_soc": 122218,
-    "serv_div": 144437,
-    "gobierno": 67564
-  },
-  {
-    "p": "I 17",
-    "agric": 229040,
-    "ind_ext": 5226,
-    "manufactura": 130114,
-    "construccion": 101178,
-    "comercio": 189581,
-    "restaurantes": 69212,
-    "transportes": 51155,
-    "serv_prof": 47654,
-    "serv_soc": 138058,
-    "serv_div": 150669,
-    "gobierno": 69213
-  },
-  {
-    "p": "II 17",
-    "agric": 236306,
-    "ind_ext": 5766,
-    "manufactura": 138409,
-    "construccion": 99642,
-    "comercio": 166882,
-    "restaurantes": 70845,
-    "transportes": 45523,
-    "serv_prof": 43617,
-    "serv_soc": 136545,
-    "serv_div": 144392,
-    "gobierno": 58217
-  },
-  {
-    "p": "III 17",
-    "agric": 240209,
-    "ind_ext": 2881,
-    "manufactura": 129516,
-    "construccion": 120404,
-    "comercio": 183523,
-    "restaurantes": 61049,
-    "transportes": 40127,
-    "serv_prof": 50223,
-    "serv_soc": 143067,
-    "serv_div": 131635,
-    "gobierno": 59869
-  },
-  {
-    "p": "IV 17",
-    "agric": 272652,
-    "ind_ext": 4457,
-    "manufactura": 139952,
-    "construccion": 98065,
-    "comercio": 173925,
-    "restaurantes": 57947,
-    "transportes": 42828,
-    "serv_prof": 47723,
-    "serv_soc": 145729,
-    "serv_div": 137974,
-    "gobierno": 63824
-  },
-  {
-    "p": "I 18",
-    "agric": 280958,
-    "ind_ext": 6540,
-    "manufactura": 144373,
-    "construccion": 108097,
-    "comercio": 190399,
-    "restaurantes": 68120,
-    "transportes": 50218,
-    "serv_prof": 48150,
-    "serv_soc": 142687,
-    "serv_div": 118578,
-    "gobierno": 64995
-  },
-  {
-    "p": "II 18",
-    "agric": 279107,
-    "ind_ext": 6878,
-    "manufactura": 138199,
-    "construccion": 115423,
-    "comercio": 201971,
-    "restaurantes": 46939,
-    "transportes": 56893,
-    "serv_prof": 51403,
-    "serv_soc": 148501,
-    "serv_div": 118649,
-    "gobierno": 65081
-  },
-  {
-    "p": "III 18",
-    "agric": 252834,
-    "ind_ext": 5544,
-    "manufactura": 133004,
-    "construccion": 130593,
-    "comercio": 192063,
-    "restaurantes": 60837,
-    "transportes": 55210,
-    "serv_prof": 48028,
-    "serv_soc": 152802,
-    "serv_div": 130350,
-    "gobierno": 68389
-  },
-  {
-    "p": "IV 18",
-    "agric": 259881,
-    "ind_ext": 4008,
-    "manufactura": 122373,
-    "construccion": 111238,
-    "comercio": 209761,
-    "restaurantes": 63658,
-    "transportes": 54351,
-    "serv_prof": 47918,
-    "serv_soc": 142940,
-    "serv_div": 146493,
-    "gobierno": 73057
-  },
-  {
-    "p": "I 19",
-    "agric": 305348,
-    "ind_ext": 4900,
-    "manufactura": 143361,
-    "construccion": 112338,
-    "comercio": 218063,
-    "restaurantes": 66965,
-    "transportes": 50308,
-    "serv_prof": 49633,
-    "serv_soc": 142705,
-    "serv_div": 150620,
-    "gobierno": 64766
-  },
-  {
-    "p": "II 19",
-    "agric": 319126,
-    "ind_ext": 5837,
-    "manufactura": 170600,
-    "construccion": 129472,
-    "comercio": 204066,
-    "restaurantes": 56520,
-    "transportes": 40925,
-    "serv_prof": 43033,
-    "serv_soc": 139232,
-    "serv_div": 150760,
-    "gobierno": 68879
-  },
-  {
-    "p": "III 19",
-    "agric": 281725,
-    "ind_ext": 8599,
-    "manufactura": 180218,
-    "construccion": 137769,
-    "comercio": 182102,
-    "restaurantes": 63142,
-    "transportes": 46404,
-    "serv_prof": 51413,
-    "serv_soc": 145864,
-    "serv_div": 127758,
-    "gobierno": 74700
-  },
-  {
-    "p": "IV 19",
-    "agric": 285098,
-    "ind_ext": 7740,
-    "manufactura": 139641,
-    "construccion": 130904,
-    "comercio": 204803,
-    "restaurantes": 58839,
-    "transportes": 52741,
-    "serv_prof": 49159,
-    "serv_soc": 153433,
-    "serv_div": 138620,
-    "gobierno": 77259
-  },
-  {
-    "p": "I 20",
-    "agric": 312006,
-    "ind_ext": 9056,
-    "manufactura": 149986,
-    "construccion": 122147,
-    "comercio": 205731,
-    "restaurantes": 63765,
-    "transportes": 47705,
-    "serv_prof": 58656,
-    "serv_soc": 155373,
-    "serv_div": 125843,
-    "gobierno": 82370
-  },
-  {
-    "p": "III 20",
-    "agric": 233856,
-    "ind_ext": 7023,
-    "manufactura": 112185,
-    "construccion": 104727,
-    "comercio": 198214,
-    "restaurantes": 53546,
-    "transportes": 54580,
-    "serv_prof": 49484,
-    "serv_soc": 171413,
-    "serv_div": 117817,
-    "gobierno": 74882
-  },
-  {
-    "p": "IV 20",
-    "agric": 223728,
-    "ind_ext": 10177,
-    "manufactura": 115362,
-    "construccion": 132800,
-    "comercio": 241143,
-    "restaurantes": 61168,
-    "transportes": 75017,
-    "serv_prof": 49264,
-    "serv_soc": 141853,
-    "serv_div": 145243,
-    "gobierno": 81076
-  },
-  {
-    "p": "I 21",
-    "agric": 348057,
-    "ind_ext": 7495,
-    "manufactura": 170402,
-    "construccion": 117485,
-    "comercio": 198304,
-    "restaurantes": 53439,
-    "transportes": 39575,
-    "serv_prof": 52728,
-    "serv_soc": 134182,
-    "serv_div": 132215,
-    "gobierno": 67219
-  },
-  {
-    "p": "II 21",
-    "agric": 286353,
-    "ind_ext": 3142,
-    "manufactura": 162208,
-    "construccion": 121286,
-    "comercio": 210136,
-    "restaurantes": 58118,
-    "transportes": 72938,
-    "serv_prof": 60843,
-    "serv_soc": 145690,
-    "serv_div": 142555,
-    "gobierno": 76332
-  },
-  {
-    "p": "III 21",
-    "agric": 286913,
-    "ind_ext": 17898,
-    "manufactura": 123245,
-    "construccion": 136934,
-    "comercio": 203831,
-    "restaurantes": 61845,
-    "transportes": 68418,
-    "serv_prof": 79442,
-    "serv_soc": 179195,
-    "serv_div": 133460,
-    "gobierno": 93221
-  },
-  {
-    "p": "IV 21",
-    "agric": 292964,
-    "ind_ext": 18272,
-    "manufactura": 117138,
-    "construccion": 133001,
-    "comercio": 212709,
-    "restaurantes": 73527,
-    "transportes": 64077,
-    "serv_prof": 76459,
-    "serv_soc": 173318,
-    "serv_div": 159293,
-    "gobierno": 84432
-  },
-  {
-    "p": "I 22",
-    "agric": 276128,
-    "ind_ext": 11410,
-    "manufactura": 144376,
-    "construccion": 138305,
-    "comercio": 248080,
-    "restaurantes": 58007,
-    "transportes": 59912,
-    "serv_prof": 69159,
-    "serv_soc": 180138,
-    "serv_div": 147574,
-    "gobierno": 75785
-  },
-  {
-    "p": "II 22",
-    "agric": 279570,
-    "ind_ext": 12996,
-    "manufactura": 176355,
-    "construccion": 151655,
-    "comercio": 236322,
-    "restaurantes": 75335,
-    "transportes": 54100,
-    "serv_prof": 66455,
-    "serv_soc": 163237,
-    "serv_div": 156187,
-    "gobierno": 81593
-  },
-  {
-    "p": "III 22",
-    "agric": 302224,
-    "ind_ext": 11567,
-    "manufactura": 164227,
-    "construccion": 136117,
-    "comercio": 253011,
-    "restaurantes": 72430,
-    "transportes": 63930,
-    "serv_prof": 60468,
-    "serv_soc": 155197,
-    "serv_div": 137968,
-    "gobierno": 71489
-  },
-  {
-    "p": "IV 22",
-    "agric": 300010,
-    "ind_ext": 12462,
-    "manufactura": 163884,
-    "construccion": 145776,
-    "comercio": 232792,
-    "restaurantes": 71868,
-    "transportes": 62995,
-    "serv_prof": 57722,
-    "serv_soc": 148645,
-    "serv_div": 144531,
-    "gobierno": 74718
-  },
-  {
-    "p": "I 23",
-    "agric": 339422,
-    "ind_ext": 8380,
-    "manufactura": 145034,
-    "construccion": 134006,
-    "comercio": 246100,
-    "restaurantes": 92438,
-    "transportes": 64165,
-    "serv_prof": 58537,
-    "serv_soc": 135945,
-    "serv_div": 148285,
-    "gobierno": 74181
-  },
-  {
-    "p": "II 23",
-    "agric": 317673,
-    "ind_ext": 6565,
-    "manufactura": 164639,
-    "construccion": 144155,
-    "comercio": 233510,
-    "restaurantes": 88774,
-    "transportes": 60640,
-    "serv_prof": 77868,
-    "serv_soc": 136923,
-    "serv_div": 141773,
-    "gobierno": 68228
-  },
-  {
-    "p": "III 23",
-    "agric": 333151,
-    "ind_ext": 9558,
-    "manufactura": 176106,
-    "construccion": 131827,
-    "comercio": 222177,
-    "restaurantes": 99710,
-    "transportes": 65456,
-    "serv_prof": 82169,
-    "serv_soc": 149381,
-    "serv_div": 155226,
-    "gobierno": 81558
-  },
-  {
-    "p": "IV 23",
-    "agric": 335521,
-    "ind_ext": 8792,
-    "manufactura": 152201,
-    "construccion": 139457,
-    "comercio": 244314,
-    "restaurantes": 95402,
-    "transportes": 58597,
-    "serv_prof": 78653,
-    "serv_soc": 125727,
-    "serv_div": 154007,
-    "gobierno": 103488
-  },
-  {
-    "p": "I 24",
-    "agric": 356478,
-    "ind_ext": 9293,
-    "manufactura": 164918,
-    "construccion": 121372,
-    "comercio": 249884,
-    "restaurantes": 104620,
-    "transportes": 61568,
-    "serv_prof": 82864,
-    "serv_soc": 131189,
-    "serv_div": 149758,
-    "gobierno": 91786
-  },
-  {
-    "p": "II 24",
-    "agric": 277285,
-    "ind_ext": 5633,
-    "manufactura": 192072,
-    "construccion": 118885,
-    "comercio": 262730,
-    "restaurantes": 105936,
-    "transportes": 66047,
-    "serv_prof": 80476,
-    "serv_soc": 141160,
-    "serv_div": 148613,
-    "gobierno": 97940
-  },
-  {
-    "p": "III 24",
-    "agric": 263967,
-    "ind_ext": 10229,
-    "manufactura": 159092,
-    "construccion": 118851,
-    "comercio": 252804,
-    "restaurantes": 97243,
-    "transportes": 60279,
-    "serv_prof": 90896,
-    "serv_soc": 149463,
-    "serv_div": 122933,
-    "gobierno": 88463
-  },
-  {
-    "p": "IV 24",
-    "agric": 252815,
-    "ind_ext": 5431,
-    "manufactura": 174759,
-    "construccion": 120332,
-    "comercio": 264486,
-    "restaurantes": 104491,
-    "transportes": 49872,
-    "serv_prof": 79594,
-    "serv_soc": 160330,
-    "serv_div": 146830,
-    "gobierno": 87256
-  },
-  {
-    "p": "I 25",
-    "agric": 299983,
-    "ind_ext": 5425,
-    "manufactura": 171228,
-    "construccion": 138179,
-    "comercio": 280180,
-    "restaurantes": 112643,
-    "transportes": 59199,
-    "serv_prof": 71340,
-    "serv_soc": 163417,
-    "serv_div": 122501,
-    "gobierno": 79404
-  },
-  {
-    "p": "II 25",
-    "agric": 248133,
-    "ind_ext": 5583,
-    "manufactura": 176828,
-    "construccion": 153224,
-    "comercio": 273470,
-    "restaurantes": 97480,
-    "transportes": 51223,
-    "serv_prof": 77429,
-    "serv_soc": 160264,
-    "serv_div": 156461,
-    "gobierno": 84402
-  },
-  {
-    "p": "III 25",
-    "agric": 259296,
-    "ind_ext": 6009,
-    "manufactura": 171962,
-    "construccion": 158982,
-    "comercio": 309448,
-    "restaurantes": 86476,
-    "transportes": 47486,
-    "serv_prof": 60774,
-    "serv_soc": 168122,
-    "serv_div": 169501,
-    "gobierno": 72862
-  },
-  {
-    "p": "IV 25",
-    "agric": 305777,
-    "ind_ext": 5280,
-    "manufactura": 146196,
-    "construccion": 150454,
-    "comercio": 282234,
-    "restaurantes": 94559,
-    "transportes": 54694,
-    "serv_prof": 69491,
-    "serv_soc": 158211,
-    "serv_div": 167248,
-    "gobierno": 82864
-  }
-];
-
-// ════════════════════════════════════════════════════════════════════════════
-//  DATOS IMSS — Distribución sectorial · Enero 2026
-// ════════════════════════════════════════════════════════════════════════════
-const IMSS_SECTORES_ENE26 = [
-  {
-    p: "Ene 26",
-    agric: 60127, ind_ext: 1601,
-    transf_1: 53592, transf_2: 27321, construccion: 32943, electrica: 5504,
-    comercio: 123158, transportes: 28276, serv_empresas: 65753, serv_soc: 101567
-  }
-];
-
-const IMSS_GRANDES_ENE26 = [
-  { p: "Ene 26", primario: 61728, secundario: 119360, terciario: 318754 }
-];
-
+// ─── SECTORES ────────────────────────────────────────────────────────────────
 const SEC_E = [
   {s:"Servicios",v:38.2,c:"#6B1737"},{s:"Comercio",v:20.1,c:"#8C2249"},
   {s:"Agropecuario",v:18.4,c:"#B03560"},{s:"Manufactura",v:11.8,c:"#C8427A"},
@@ -1000,7 +211,6 @@ const fmtM  = v => `${(v / 1e6).toFixed(2)}M`;
 const fmtN  = v => v != null ? Math.round(v).toLocaleString("es-MX") : "";
 const avg   = (arr, key) => { const v = arr.map(d => d[key]).filter(x => x != null); return v.reduce((a,b)=>a+b,0)/v.length; };
 
-// Mostrar año en eje X solo cuando cambia (trimestre I)
 const xTickYear = value => {
   if (!value) return "";
   const [trim, yr] = value.split(" ");
@@ -1014,7 +224,6 @@ const legFmt = v => <span style={{ fontFamily: FONT, fontSize: 10, color: MX.gra
 //  COMPONENTES BASE
 // ════════════════════════════════════════════════════════════════════════════
 
-// Número animado
 function AnimNum({ target, fmt }) {
   const [n, setN] = useState(0);
   const raf = useRef(null);
@@ -1036,64 +245,116 @@ function AnimNum({ target, fmt }) {
   return <>{Math.round(n).toLocaleString("es-MX")}</>;
 }
 
-// KPI Card
-function KpiCard({ label, valor, fmt, nacStr, delta, dDir, nota, color }) {
+// KPI Card — responsiva
+function KpiCard({ label, valor, fmt, nacStr, delta, dDir, nota, color, isMobile }) {
   const [hov, setHov] = useState(false);
   return (
-    <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
-      fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`,
-      borderLeft: `4px solid ${color}`, borderRadius: 10, padding: "18px 20px", flex: 1,
-      boxShadow: hov ? "0 8px 24px rgba(107,23,55,0.13)" : "0 2px 8px rgba(0,0,0,0.05)",
-      transform: hov ? "translateY(-2px)" : "none", transition: "all .18s ease",
-    }}>
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: MX.grayMid, textTransform: "uppercase", marginBottom: 8 }}>{label}</div>
-      <div style={{ fontSize: 32, fontWeight: 700, color, lineHeight: 1, marginBottom: 8 }}><AnimNum target={valor} fmt={fmt} /></div>
-      {nacStr && <div style={{ fontSize: 10, color: MX.grayMid, marginBottom: 4 }}>Nacional: <b style={{ color: MX.grayDark }}>{nacStr}</b></div>}
-      {delta  && <div style={{ fontSize: 10, fontWeight: 700, color: dDir === "pos" ? MX.green : "#C0392B", marginBottom: 4 }}>{dDir === "pos" ? "▲" : "▼"} {delta} vs año anterior</div>}
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        fontFamily: FONT,
+        background: MX.white,
+        border: `1px solid ${MX.border}`,
+        borderLeft: `4px solid ${color}`,
+        borderRadius: 10,
+        padding: isMobile ? "14px 12px" : "18px 20px",
+        flex: 1,
+        minWidth: 0,
+        boxShadow: hov ? "0 8px 24px rgba(107,23,55,0.13)" : "0 2px 8px rgba(0,0,0,0.05)",
+        transform: hov ? "translateY(-2px)" : "none",
+        transition: "all .18s ease",
+      }}
+    >
+      <div style={{ fontSize: isMobile ? 8 : 9, fontWeight: 700, letterSpacing: isMobile ? 1 : 2, color: MX.grayMid, textTransform: "uppercase", marginBottom: 6 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: isMobile ? 24 : 32, fontWeight: 700, color, lineHeight: 1, marginBottom: 6 }}>
+        <AnimNum target={valor} fmt={fmt} />
+      </div>
+      {nacStr && (
+        <div style={{ fontSize: isMobile ? 9 : 10, color: MX.grayMid, marginBottom: 3 }}>
+          Nacional: <b style={{ color: MX.grayDark }}>{nacStr}</b>
+        </div>
+      )}
+      {delta && (
+        <div style={{ fontSize: isMobile ? 9 : 10, fontWeight: 700, color: dDir === "pos" ? MX.green : "#C0392B", marginBottom: 3 }}>
+          {dDir === "pos" ? "▲" : "▼"} {delta}
+        </div>
+      )}
       <div style={{ fontSize: 9, color: MX.grayMid, lineHeight: 1.4 }}>{nota}</div>
     </div>
   );
 }
 
-// Pill buttons
-function Pills({ options, active, onChange }) {
+// Pills
+function Pills({ options, active, onChange, isMobile }) {
   return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
       {options.map(o => (
         <button key={o.id} onClick={() => onChange(o.id)} style={{
-          fontFamily: FONT, fontSize: 11, fontWeight: 600, cursor: "pointer",
-          padding: "5px 16px", borderRadius: 20, transition: "all .15s",
+          fontFamily: FONT,
+          fontSize: isMobile ? 10 : 11,
+          fontWeight: 600,
+          cursor: "pointer",
+          padding: isMobile ? "4px 12px" : "5px 16px",
+          borderRadius: 20,
+          transition: "all .15s",
           background: active === o.id ? MX.vino : "transparent",
           color: active === o.id ? MX.white : MX.vino,
           border: `1.5px solid ${MX.vino}`,
+          whiteSpace: "nowrap",
         }}>{o.label}</button>
       ))}
     </div>
   );
 }
 
-// Sección con título + pills
-function Section({ title, sub, options, active, onChange, children }) {
+// Sección con título + pills — responsiva
+function Section({ title, sub, options, active, onChange, children, isMobile }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 4, height: 22, background: MX.vino, borderRadius: 2 }} />
-          <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: MX.vinoDark }}>{title}</span>
-          {sub && <span style={{ fontFamily: FONT, fontSize: 9, color: MX.grayMid, background: MX.crema, border: `1px solid ${MX.border}`, borderRadius: 20, padding: "2px 10px" }}>{sub}</span>}
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Título + badge */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ width: 4, height: 22, background: MX.vino, borderRadius: 2, flexShrink: 0 }} />
+          <span style={{ fontFamily: FONT, fontSize: isMobile ? 12 : 13, fontWeight: 700, color: MX.vinoDark }}>{title}</span>
+          {sub && (
+            <span style={{
+              fontFamily: FONT, fontSize: 9, color: MX.grayMid,
+              background: MX.crema, border: `1px solid ${MX.border}`,
+              borderRadius: 20, padding: "2px 10px",
+            }}>{sub}</span>
+          )}
         </div>
-        {options && <Pills options={options} active={active} onChange={onChange} />}
+        {/* Pills en línea separada en mobile */}
+        {options && (
+          <div style={{ paddingLeft: isMobile ? 14 : 0, overflowX: "auto", paddingBottom: 2 }}>
+            <Pills options={options} active={active} onChange={onChange} isMobile={isMobile} />
+          </div>
+        )}
       </div>
       {children}
     </div>
   );
 }
 
-// Card contenedor de gráfica
-function Card({ title, children, style }) {
+// Card contenedor de gráfica — responsiva
+function Card({ title, children, style, isMobile }) {
   return (
-    <div style={{ background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 10, padding: "18px 20px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", ...style }}>
-      {title && <div style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: MX.vino, marginBottom: 14 }}>{title}</div>}
+    <div style={{
+      background: MX.white,
+      border: `1px solid ${MX.border}`,
+      borderRadius: 10,
+      padding: isMobile ? "14px 12px" : "18px 20px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+      ...style,
+    }}>
+      {title && (
+        <div style={{ fontFamily: FONT, fontSize: isMobile ? 10 : 11, fontWeight: 700, color: MX.vino, marginBottom: 12, lineHeight: 1.4 }}>
+          {title}
+        </div>
+      )}
       {children}
     </div>
   );
@@ -1101,32 +362,36 @@ function Card({ title, children, style }) {
 
 // Etiqueta pie
 const PieLabel = ({ cx, cy, midAngle, outerRadius, value }) => {
-  const R = Math.PI / 180, r = outerRadius + 18;
+  const R = Math.PI / 180, r = outerRadius + 16;
   const x = cx + r * Math.cos(-midAngle * R), y = cy + r * Math.sin(-midAngle * R);
-  if (value < 4) return null;
-  return <text x={x} y={y} fill={MX.grayDark} textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={9} fontFamily={FONT} fontWeight={600}>{value}%</text>;
+  if (value < 5) return null;
+  return (
+    <text x={x} y={y} fill={MX.grayDark} textAnchor={x > cx ? "start" : "end"}
+      dominantBaseline="central" fontSize={9} fontFamily={FONT} fontWeight={600}>
+      {value}%
+    </text>
+  );
 };
 
 // ════════════════════════════════════════════════════════════════════════════
-//  GRÁFICA A — PEA vs Población Ocupada (ENOE_PEA + ENOE_S32_TOTAL)
+//  GRÁFICA A — PEA vs Población Ocupada
 // ════════════════════════════════════════════════════════════════════════════
-function GrafPEAOcupados() {
-  const data = mergeByPeriod(ENOE_PEA, ENOE_OCUP, ENOE_DESOC_ABS);
+function GrafPEAOcupados({ isMobile }) {
+  const data = mergeByPeriod(ENOE_PEA, ENOE_S32_TOTAL);
 
   const TooltipPEA = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
-    const row      = data.find(d => d.p === label) || {};
-    const pea      = row.pea;
-    const ocup     = row.ocup;
-    const sinEmpl  = row.desoc_abs;
+    const pea  = payload.find(p => p.dataKey === "pea")?.value;
+    const ocup = payload.find(p => p.dataKey === "total")?.value;
+    const brech = pea != null && ocup != null ? pea - ocup : null;
     return (
-      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 14px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 11 }}>
-        <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 6 }}>{label}</div>
+      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 12px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 10 }}>
+        <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 5 }}>{label}</div>
         <div style={{ marginBottom: 2 }}><span style={{ color: MX.grayMid }}>PEA: </span><b style={{ color: MX.vino }}>{fmtN(pea)}</b></div>
-        <div style={{ marginBottom: 6 }}><span style={{ color: MX.grayMid }}>Ocupados: </span><b style={{ color: MX.rosa }}>{fmtN(ocup)}</b></div>
-        {sinEmpl != null && (
-          <div style={{ paddingTop: 6, borderTop: `1px solid ${MX.border}` }}>
-            <span style={{ color: MX.grayMid }}>Personas sin empleo: </span><b style={{ color: MX.vinoMid }}>{fmtN(sinEmpl)}</b>
+        <div style={{ marginBottom: 5 }}><span style={{ color: MX.grayMid }}>Ocupados: </span><b style={{ color: MX.rosa }}>{fmtN(ocup)}</b></div>
+        {brech != null && (
+          <div style={{ paddingTop: 5, borderTop: `1px solid ${MX.border}` }}>
+            <span style={{ color: MX.grayMid }}>Sin empleo: </span><b style={{ color: MX.vinoMid }}>{fmtN(brech)}</b>
           </div>
         )}
       </div>
@@ -1134,31 +399,23 @@ function GrafPEAOcupados() {
   };
 
   return (
-    <Card title="PEA vs Población Ocupada — Michoacán" style={{ width: "100%" }}>
-      <ResponsiveContainer width="100%" height={230}>
-        <ComposedChart data={data} margin={{ left: 14, right: 14, top: 10, bottom: 0 }}>
+    <Card title="PEA vs Población Ocupada — Michoacán" isMobile={isMobile} style={{ width: "100%" }}>
+      <ResponsiveContainer width="100%" height={isMobile ? 200 : 230}>
+        <ComposedChart data={data} margin={{ left: isMobile ? 4 : 14, right: isMobile ? 4 : 14, top: 10, bottom: 0 }}>
           <defs>
-            <linearGradient id="grdRosa" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor={MX.rosa} stopOpacity={0.22} />
-              <stop offset="100%" stopColor={MX.rosa} stopOpacity={0.02} />
-            </linearGradient>
-            <linearGradient id="grdVino" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor={MX.vino} stopOpacity={0.07} />
+            <linearGradient id="grdArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={MX.vino} stopOpacity={0.10} />
               <stop offset="100%" stopColor={MX.vino} stopOpacity={0.01} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
-          <XAxis dataKey="p" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={xTickYear} interval={0} />
-          <YAxis tick={axTick()} axisLine={false} tickLine={false} tickFormatter={fmtM} domain={[1700000, 2450000]} />
+          <XAxis dataKey="p" tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={xTickYear} interval={0} />
+          <YAxis tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={fmtM} domain={[1700000, 2450000]} width={isMobile ? 36 : 45} />
           <Tooltip content={<TooltipPEA />} />
-          <Legend iconType="circle" iconSize={8} formatter={legFmt} />
-          {/* Área bajo PEA (vino, sutil) */}
-          <Area type="monotone" dataKey="pea"  fill="url(#grdVino)" stroke="none" legendType="none" />
-          {/* Área bajo Ocupados (rosa, resaltada) */}
-          <Area type="monotone" dataKey="ocup" fill="url(#grdRosa)" stroke="none" legendType="none" />
-          {/* Líneas encima de las áreas */}
-          <Line type="monotone" dataKey="pea"  name="PEA"               stroke={MX.vino} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.vino, stroke: MX.white, strokeWidth: 2 }} />
-          <Line type="monotone" dataKey="ocup" name="Población Ocupada" stroke={MX.rosa} strokeWidth={2.5} strokeDasharray="6 3" dot={false} activeDot={{ r: 5, fill: MX.rosa, stroke: MX.white, strokeWidth: 2 }} />
+          <Legend iconType="circle" iconSize={7} formatter={legFmt} />
+          <Area type="monotone" dataKey="pea" fill="url(#grdArea)" stroke="none" legendType="none" />
+          <Line type="monotone" dataKey="pea"   name="PEA"               stroke={MX.vino} strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+          <Line type="monotone" dataKey="total" name="Población Ocupada" stroke={MX.rosa} strokeWidth={2} strokeDasharray="6 3" dot={false} activeDot={{ r: 4 }} />
         </ComposedChart>
       </ResponsiveContainer>
     </Card>
@@ -1166,9 +423,9 @@ function GrafPEAOcupados() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  GRÁFICA B — Tasas dobles (PART + DESOC) — pestaña en Fuerza Laboral
+//  GRÁFICA B — Tasas dobles
 // ════════════════════════════════════════════════════════════════════════════
-function GrafTasas() {
+function GrafTasas({ isMobile }) {
   const data        = mergeByPeriod(ENOE_PART, ENOE_DESOC);
   const mediaPartic = avg(data, "part");
   const mediaDesoc  = avg(data, "desoc");
@@ -1176,8 +433,8 @@ function GrafTasas() {
   const TooltipTasas = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 14px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 11 }}>
-        <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 6 }}>{label}</div>
+      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 12px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 10 }}>
+        <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 5 }}>{label}</div>
         {payload.map((p, i) => (
           <div key={i} style={{ marginBottom: 2 }}>
             <span style={{ color: MX.grayMid }}>{p.name}: </span>
@@ -1189,33 +446,19 @@ function GrafTasas() {
   };
 
   return (
-    <Card title="Tasa de Participación y Tasa de Desocupación (%)" style={{ width: "100%" }}>
-      <ResponsiveContainer width="100%" height={230}>
-        <ComposedChart data={data} margin={{ left: 14, right: 34, top: 5, bottom: 0 }}>
-          <defs>
-            <linearGradient id="grdTasaVino" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor={MX.vino} stopOpacity={0.07} />
-              <stop offset="100%" stopColor={MX.vino} stopOpacity={0.01} />
-            </linearGradient>
-            <linearGradient id="grdTasaRosa" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stopColor={MX.rosa} stopOpacity={0.25} />
-              <stop offset="100%" stopColor={MX.rosa} stopOpacity={0.02} />
-            </linearGradient>
-          </defs>
+    <Card title="Tasa de Participación y Tasa de Desocupación (%)" isMobile={isMobile} style={{ width: "100%" }}>
+      <ResponsiveContainer width="100%" height={isMobile ? 200 : 230}>
+        <ComposedChart data={data} margin={{ left: isMobile ? 4 : 14, right: isMobile ? 28 : 34, top: 5, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
-          <XAxis dataKey="p" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={xTickYear} interval={0} />
-          <YAxis yAxisId="L" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={v => `${v.toFixed(1)}%`} domain={[50, 65]} />
-          <YAxis yAxisId="R" orientation="right" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={v => `${v.toFixed(1)}%`} domain={[0, 5]} />
+          <XAxis dataKey="p" tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={xTickYear} interval={0} />
+          <YAxis yAxisId="L" tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={v => `${v.toFixed(0)}%`} domain={[50, 65]} width={isMobile ? 28 : 36} />
+          <YAxis yAxisId="R" orientation="right" tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={v => `${v.toFixed(1)}%`} domain={[0, 5]} width={isMobile ? 24 : 30} />
           <Tooltip content={<TooltipTasas />} />
-          <Legend iconType="circle" iconSize={8} formatter={legFmt} />
+          <Legend iconType="circle" iconSize={7} formatter={legFmt} />
           <ReferenceLine yAxisId="L" y={mediaPartic} stroke={MX.vino} strokeDasharray="4 3" strokeOpacity={0.35} />
           <ReferenceLine yAxisId="R" y={mediaDesoc}  stroke={MX.rosa} strokeDasharray="4 3" strokeOpacity={0.35} />
-          {/* Áreas */}
-          <Area yAxisId="L" type="monotone" dataKey="part"  fill="url(#grdTasaVino)" stroke="none" legendType="none" />
-          <Area yAxisId="R" type="monotone" dataKey="desoc" fill="url(#grdTasaRosa)" stroke="none" legendType="none" />
-          {/* Líneas */}
-          <Line yAxisId="L" type="monotone" dataKey="part"  name="T. Participación" stroke={MX.vino} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.vino, stroke: MX.white, strokeWidth: 2 }} />
-          <Line yAxisId="R" type="monotone" dataKey="desoc" name="T. Desocupación"  stroke={MX.rosa} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.rosa, stroke: MX.white, strokeWidth: 2 }} />
+          <Line yAxisId="L" type="monotone" dataKey="part"  name="T. Participación" stroke={MX.vino} strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+          <Line yAxisId="R" type="monotone" dataKey="desoc" name="T. Desocupación"  stroke={MX.rosa} strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
         </ComposedChart>
       </ResponsiveContainer>
     </Card>
@@ -1223,9 +466,23 @@ function GrafTasas() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  GRÁFICA C — Subsectores con pill por período (ENOE_S32_SUBSECTORES)
+//  GRÁFICA C — Subsectores
 // ════════════════════════════════════════════════════════════════════════════
 const ETIQ = {
+  agric:       "Agric. / Ganadería",
+  manufactura: "Manufactura",
+  construccion:"Construcción",
+  ind_ext:     "Ind. Extractiva",
+  comercio:    "Comercio",
+  restaurantes:"Rest. y Alojamiento",
+  transportes: "Transportes y Comunic.",
+  serv_prof:   "Serv. Profesionales",
+  serv_soc:    "Servicios Sociales",
+  serv_div:    "Servicios Diversos",
+  gobierno:    "Gobierno",
+};
+
+const ETIQ_FULL = {
   agric:       "Agric. / Ganadería / Silvicultura",
   manufactura: "Industria Manufacturera",
   construccion:"Construcción",
@@ -1239,10 +496,8 @@ const ETIQ = {
   gobierno:    "Gobierno",
 };
 
-function GrafSubsectores() {
-  const periodos = ENOE_S32_SUBSECTORES.map(d => d.p);
-
-  // Extraer años y trimestres únicos
+function GrafSubsectores({ isMobile }) {
+  const periodos  = ENOE_S32_SUBSECTORES.map(d => d.p);
   const años      = [...new Set(periodos.map(p => p.split(" ")[1]))];
   const trimestres = ["I", "II", "III", "IV"];
 
@@ -1250,72 +505,92 @@ function GrafSubsectores() {
   const [trim, setTrim] = useState(lastP[0]);
   const [anio, setAnio] = useState(lastP[1]);
 
-  // Ajustar si la combinación no existe
   const perKey = `${trim} ${anio}`;
   const periodoValido = periodos.includes(perKey) ? perKey : periodos[periodos.length - 1];
 
   const row     = ENOE_S32_SUBSECTORES.find(d => d.p === periodoValido) || {};
-  const barData = Object.keys(ETIQ)
-    .map(k => ({ label: ETIQ[k], val: row[k] ?? 0 }))
+  const etiqMap = isMobile ? ETIQ : ETIQ_FULL;
+  const barData = Object.keys(etiqMap)
+    .map(k => ({ label: etiqMap[k], val: row[k] ?? 0 }))
     .sort((a, b) => b.val - a.val);
 
   const barColor = i => i < 3 ? MX.vino : i < 7 ? MX.rosa : MX.neutral;
 
   const selectStyle = {
-    fontFamily: FONT, fontSize: 11, fontWeight: 600, cursor: "pointer",
-    padding: "5px 12px", borderRadius: 20, border: `1.5px solid ${MX.vino}`,
+    fontFamily: FONT, fontSize: 10, fontWeight: 600, cursor: "pointer",
+    padding: "4px 10px", borderRadius: 20, border: `1.5px solid ${MX.vino}`,
     color: MX.vino, background: MX.crema, outline: "none", appearance: "none",
-    WebkitAppearance: "none", paddingRight: 28,
+    WebkitAppearance: "none", paddingRight: 24,
   };
 
   const TooltipSub = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 14px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 11 }}>
+      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 12px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 10 }}>
         <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 4 }}>{label}</div>
         <b style={{ color: MX.grayDark }}>{fmtN(payload[0]?.value)}</b> personas
       </div>
     );
   };
 
+  // Altura dinámica según mobile
+  const chartH = isMobile ? 340 : 380;
+  const yAxisW = isMobile ? 110 : 210;
+  const labelFontSize = isMobile ? 8 : 9;
+
   return (
-    <Card style={{ width: "100%" }}>
-      {/* Encabezado con selectores de trimestre y año */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-        <div style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: MX.vino }}>
+    <Card isMobile={isMobile} style={{ width: "100%" }}>
+      {/* Encabezado con selectores */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+        <div style={{ fontFamily: FONT, fontSize: isMobile ? 10 : 11, fontWeight: 700, color: MX.vino, lineHeight: 1.4 }}>
           Ocupación por Sector de Actividad Económica — Michoacán
         </div>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           {/* Selector Trimestre */}
           <div style={{ position: "relative" }}>
             <select value={trim} onChange={e => setTrim(e.target.value)} style={selectStyle}>
-              {trimestres.map(t => <option key={t} value={t}>{t === "I" ? "I Trim." : t === "II" ? "II Trim." : t === "III" ? "III Trim." : "IV Trim."}</option>)}
+              {trimestres.map(t => (
+                <option key={t} value={t}>{t === "I" ? "I Trim." : t === "II" ? "II Trim." : t === "III" ? "III Trim." : "IV Trim."}</option>
+              ))}
             </select>
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: MX.vino, fontSize: 10 }}>▾</span>
+            <span style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: MX.vino, fontSize: 9 }}>▾</span>
           </div>
           {/* Selector Año */}
           <div style={{ position: "relative" }}>
             <select value={anio} onChange={e => setAnio(e.target.value)} style={selectStyle}>
               {años.map(a => <option key={a} value={a}>20{a}</option>)}
             </select>
-            <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: MX.vino, fontSize: 10 }}>▾</span>
+            <span style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: MX.vino, fontSize: 9 }}>▾</span>
           </div>
           {!periodos.includes(perKey) && (
-            <span style={{ fontFamily: FONT, fontSize: 9, color: MX.rosa }}>Período no disponible — mostrando {periodoValido}</span>
+            <span style={{ fontFamily: FONT, fontSize: 9, color: MX.rosa }}>
+              No disponible — mostrando {periodoValido}
+            </span>
           )}
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={360}>
-        <BarChart data={barData} layout="vertical" margin={{ left: 10, right: 80, top: 5, bottom: 5 }}>
+
+      <ResponsiveContainer width="100%" height={chartH}>
+        <BarChart data={barData} layout="vertical" margin={{ left: 4, right: isMobile ? 52 : 80, top: 4, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" horizontal={false} />
-          <XAxis type="number" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-          <YAxis type="category" dataKey="label" tick={axTick({ fontSize: 9 })} axisLine={false} tickLine={false} width={205} />
+          <XAxis type="number" tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
+          <YAxis
+            type="category"
+            dataKey="label"
+            tick={axTick({ fontSize: labelFontSize })}
+            axisLine={false}
+            tickLine={false}
+            width={yAxisW}
+          />
           <Tooltip content={<TooltipSub />} />
           <Bar dataKey="val" name="Ocupados" radius={[0, 4, 4, 0]}>
             {barData.map((_, i) => <Cell key={i} fill={barColor(i)} />)}
-            <LabelList dataKey="val" position="right"
-              style={{ fontFamily: FONT, fontSize: 9, fill: MX.grayDark, fontWeight: 600 }}
-              formatter={fmtN} />
+            <LabelList
+              dataKey="val"
+              position="right"
+              style={{ fontFamily: FONT, fontSize: labelFontSize, fill: MX.grayDark, fontWeight: 600 }}
+              formatter={v => isMobile ? `${(v/1000).toFixed(0)}k` : fmtN(v)}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
@@ -1326,7 +601,7 @@ function GrafSubsectores() {
 // ════════════════════════════════════════════════════════════════════════════
 //  TAB ENOE
 // ════════════════════════════════════════════════════════════════════════════
-function TabENOE() {
+function TabENOE({ isMobile }) {
   const [secFL,  setSecFL]  = useState("pea");
   const [secDin, setSecDin] = useState("sectores");
 
@@ -1336,35 +611,47 @@ function TabENOE() {
   const lastDesoc = ENOE_DESOC[ENOE_DESOC.length - 1];
 
   const KPIs = [
-    { label: "PEA",              valor: lastPEA.pea,     fmt: "M",   nacStr: "61.2 M", color: MX.vino,    nota: "Población Económicamente Activa (IV 25)" },
+    { label: "PEA",              valor: lastPEA.pea,     fmt: "M",   nacStr: "61.2 M", color: MX.vino,    nota: "Pob. Económicamente Activa (IV 25)" },
     { label: "T. Participación", valor: lastPart.part,   fmt: "pct", nacStr: "60.2%",  color: MX.vinoMid, nota: "% de la PET en el mercado laboral" },
     { label: "T. Desocupación",  valor: lastDesoc.desoc, fmt: "pct", nacStr: "2.7%",   color: MX.rosa,    nota: "% de la PEA desocupada" },
-    { label: "Población Ocupada",valor: lastOcup.total,  fmt: "M",   nacStr: "—",      color: MX.vino,    nota: "Ocupados totales S32 (IV 25)" },
+    { label: "Pob. Ocupada",     valor: lastOcup.total,  fmt: "M",   nacStr: "—",      color: MX.vino,    nota: "Ocupados totales S32 (IV 25)" },
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      {/* KPI Cards */}
-      <div style={{ display: "flex", gap: 14 }}>
-        {KPIs.map((k, i) => <KpiCard key={i} {...k} />)}
+    <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 18 : 24 }}>
+      {/* KPI Cards — 2x2 en mobile, 4 en fila en desktop */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
+        gap: isMobile ? 10 : 14,
+      }}>
+        {KPIs.map((k, i) => <KpiCard key={i} {...k} isMobile={isMobile} />)}
       </div>
 
-      {/* Sección 1 — Fuerza Laboral: dos pestañas */}
-      <Section title="Fuerza Laboral" sub="ENOE Trimestral 2016–2025"
+      <Section
+        title="Fuerza Laboral"
+        sub="ENOE Trimestral 2016–2025"
         options={[
           { id: "pea",   label: "PEA vs Ocupados" },
-          { id: "tasas", label: "Tasas de Participación y Desocupación" },
+          { id: "tasas", label: "Participación y Desocupación" },
         ]}
-        active={secFL} onChange={setSecFL}>
-        {secFL === "pea"   && <GrafPEAOcupados />}
-        {secFL === "tasas" && <GrafTasas />}
+        active={secFL}
+        onChange={setSecFL}
+        isMobile={isMobile}
+      >
+        {secFL === "pea"   && <GrafPEAOcupados isMobile={isMobile} />}
+        {secFL === "tasas" && <GrafTasas isMobile={isMobile} />}
       </Section>
 
-      {/* Sección 2 — Dinámica del Mercado Laboral: solo sectores */}
-      <Section title="Dinámica del Mercado Laboral" sub="ENOE Trimestral 2016–2025"
+      <Section
+        title="Dinámica del Mercado Laboral"
+        sub="ENOE Trimestral 2016–2025"
         options={[{ id: "sectores", label: "Sector de Actividad Económica" }]}
-        active={secDin} onChange={setSecDin}>
-        <GrafSubsectores />
+        active={secDin}
+        onChange={setSecDin}
+        isMobile={isMobile}
+      >
+        <GrafSubsectores isMobile={isMobile} />
       </Section>
 
       <div style={{ fontFamily: FONT, fontSize: 9, color: MX.grayMid, textAlign: "right" }}>
@@ -1377,225 +664,93 @@ function TabENOE() {
 // ════════════════════════════════════════════════════════════════════════════
 //  TAB IMSS
 // ════════════════════════════════════════════════════════════════════════════
-//  TAB IMSS
-// ════════════════════════════════════════════════════════════════════════════
+function TabIMSS({ isMobile }) {
+  const [g1, setG1] = useState("tot");
+  const [g2, setG2] = useState("ev");
 
-// Filtro: solo registros 2016–2026
-const filterIMSS = arr =>
-  arr.filter(d => { const y = parseInt(d.p.slice(-2)); return y >= 16 || y <= 26; });
-
-function TabIMSS() {
-  const [g1, setG1] = useState("anual");
-  const [g2, setG2] = useState("urb");   // ← default Zona Urbana
-
-  // ── KPI cards derivados de datos reales ─────────────────────────────────
-  const lastTot  = IMSS_PT_TOTAL[IMSS_PT_TOTAL.length - 1].tot;
-  const lastPerm = IMSS_PT_PERM[IMSS_PT_PERM.length - 1].perm;
-  const lastEv   = IMSS_PT_EV[IMSS_PT_EV.length - 1].ev;
-  const prevTot  = IMSS_PT_TOTAL[IMSS_PT_TOTAL.length - 13].tot;
-  const prevPerm = IMSS_PT_PERM[IMSS_PT_PERM.length - 13].perm;
-  const prevEv   = IMSS_PT_EV[IMSS_PT_EV.length - 13].ev;
-  const fmtDelta = (v, p) => `${v > p ? "+" : ""}${(v - p).toLocaleString("es-MX")}`;
-
-  const IMSS_KPI = [
-    { label:"Asegurados Vigentes", valor:lastTot,  fmt:"k", delta:fmtDelta(lastTot, prevTot),  dDir: lastTot  >= prevTot  ? "pos":"neg", nota:"Puestos de trabajo IMSS (Ene 26)", color:MX.vino    },
-    { label:"Permanentes",         valor:lastPerm, fmt:"k", delta:fmtDelta(lastPerm,prevPerm), dDir: lastPerm >= prevPerm ? "pos":"neg", nota:"Trabajadores con contrato permanente", color:MX.vinoMid },
-    { label:"Eventuales",          valor:lastEv,   fmt:"k", delta:fmtDelta(lastEv,  prevEv),   dDir: lastEv   >= prevEv   ? "pos":"neg", nota:"Eventuales campo + urbano", color:MX.rosa    },
-    { label:"Permanentes / Total", valor:(lastPerm/lastTot*100), fmt:"pct", nota:"Proporción de trabajadores permanentes (Ene 26)", color:MX.vino },
-  ];
-
-  // ── Tooltip personalizado — deduplica Area+Line del mismo dataKey ────────
-  const makeTooltip = (labelMap) => ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-    const seen = new Set();
-    const unique = payload.filter(p => {
-      if (!p.dataKey || seen.has(p.dataKey)) return false;
-      seen.add(p.dataKey);
-      return true;
-    });
-    return (
-      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 14px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 11, minWidth: 180 }}>
-        <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 6 }}>{label}</div>
-        {unique.map((p, i) => (
-          <div key={i} style={{ marginBottom: 2 }}>
-            <span style={{ color: MX.grayMid }}>{labelMap?.[p.dataKey] || p.name}: </span>
-            <b style={{ color: p.stroke || p.fill || MX.grayDark }}>{fmtN(p.value)}</b>
-          </div>
-        ))}
-      </div>
-    );
+  const G1 = {
+    tot:  { title: "Total de Puestos de Trabajo Asegurados", lines: [{ key: "tot",  name: "Total",       color: MX.vino    }], domain: [365000, 400000] },
+    perm: { title: "Trabajadores Permanentes",               lines: [{ key: "perm", name: "Permanentes", color: MX.vinoMid }], domain: [290000, 320000] },
+    ev:   { title: "Trabajadores Eventuales",                lines: [{ key: "ev",   name: "Eventuales",  color: MX.rosa    }], domain: [70000,  90000]  },
+    comp: { title: "Permanentes vs Eventuales",              domain: [0, 350000],
+      lines: [{ key: "perm", name: "Permanentes", color: MX.vino }, { key: "ev", name: "Eventuales", color: MX.rosa }] },
   };
-  const TtComp   = makeTooltip({ perm:"Permanentes", ev:"Eventuales" });
-  const TtUrb    = makeTooltip({ perm_urb:"Permanentes Urbanos", ev_urb:"Eventuales Urbanos" });
-
-
-  // Tooltip específico para BarChart (mismo estilo visual)
-  const TooltipBar = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 14px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 11, minWidth: 160 }}>
-        <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 6 }}>{label}</div>
-        <div>
-          <span style={{ color: MX.grayMid }}>Puestos de trabajo: </span>
-          <b style={{ color: MX.vino }}>{fmtN(payload[0]?.value)}</b>
-        </div>
-      </div>
-    );
+  const G2 = {
+    ev:   { title: "Eventuales del Campo vs Urbanos",  lines: [{ key: "urb",  name: "Eventuales Urbanos",   color: MX.vino }, { key: "camp", name: "Eventuales del Campo", color: MX.rosa, dash: "5 3" }] },
+    perm: { title: "Permanentes · Hombres vs Mujeres", lines: [{ key: "pH",   name: "Hombres",              color: MX.vino }, { key: "pM",   name: "Mujeres",              color: MX.rosa, dash: "5 3" }] },
   };
-
-  // ── Puestos de Trabajo — pestaña "anual" ────────────────────────────────
-  const barData = filterIMSS(IMSS_PT_TOTAL)
-    .filter(d => d.p.startsWith("Ene"))
-    .map(d => ({ ...d, anio: "20" + d.p.slice(-2) }));
-
-  const renderLabel = (props) => {
-    const { x, y, width, value, index } = props;
-    const isLast = index === barData.length - 1;
-    return (
-      <text x={x + width / 2} y={y - 6} textAnchor="middle"
-        fontFamily={FONT} fontSize={isLast ? 11 : 9} fontWeight={isLast ? 700 : 600}
-        fill={isLast ? MX.vino : MX.grayDark}>
-        {fmtN(value)}
-      </text>
-    );
-  };
-
-  // ── Puestos de Trabajo — pestaña "comp" — doble eje ─────────────────────
-  // perm: ~320k–420k  |  ev: ~64k–88k  → escalas muy distintas, dual axis
-  const compData  = filterIMSS(mergeByPeriod(IMSS_PT_PERM, IMSS_PT_EV));
-  const xTickIMSS = v => v && v.startsWith("Ene") ? "20" + v.slice(-2) : "";
-
-  // ── Desglose — datos ────────────────────────────────────────────────────
-  const dataUrb   = filterIMSS(mergeByPeriod(IMSS_PT_PERM_URB, IMSS_PT_EV_URB));
-  const dataEvCampo = filterIMSS(mergeByPeriod(IMSS_PT_PERM_CAMPO, IMSS_PT_EV_CAMPO));
-  const TtCampo = makeTooltip({ perm_campo:"Permanentes Campo", ev_campo:"Eventuales Campo" });
+  const c1 = G1[g1], c2 = G2[g2];
+  const chartH = isMobile ? 190 : 210;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      {/* KPI Cards */}
-      <div style={{ display: "flex", gap: 14 }}>
-        {IMSS_KPI.map((k, i) => <KpiCard key={i} {...k} />)}
+    <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 18 : 24 }}>
+      {/* KPI Cards 2x2 en mobile */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
+        gap: isMobile ? 10 : 14,
+      }}>
+        {IMSS_KPI.map((k, i) => <KpiCard key={i} {...k} isMobile={isMobile} />)}
       </div>
 
-      {/* Sección 1 — Puestos de Trabajo */}
-      <Section title="Puestos de Trabajo" sub="IMSS Mensual 2016–2026"
-        options={[{ id:"anual", label:"Total Anual" }, { id:"comp", label:"Permanentes vs Eventuales" }]}
-        active={g1} onChange={setG1}>
-
-        {g1 === "anual" && (
-          <Card title="Total de Puestos de Trabajo Asegurados (enero de cada año)" style={{ width: "100%" }}>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={barData} margin={{ left: 10, right: 10, top: 28, bottom: 0 }}>
-                <XAxis dataKey="anio" tick={axTick()} axisLine={false} tickLine={false} />
-                <YAxis tick={false} axisLine={false} tickLine={false} domain={["auto","auto"]} />
-                <Tooltip content={<TooltipBar />} />
-                <Bar dataKey="tot" fill={MX.vino} radius={[6, 6, 0, 0]}>
-                  <LabelList dataKey="tot" content={renderLabel} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
-
-        {/* Comp: doble eje para ver variaciones de cada serie por separado */}
-        {g1 === "comp" && (
-          <Card title="Permanentes vs Eventuales — serie mensual" style={{ width: "100%" }}>
-            <ResponsiveContainer width="100%" height={240}>
-              <ComposedChart data={compData} margin={{ left: 14, right: 20, top: 5, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="grdPermComp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={MX.vino} stopOpacity={0.08} />
-                    <stop offset="100%" stopColor={MX.vino} stopOpacity={0.01} />
-                  </linearGradient>
-                  <linearGradient id="grdEvComp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={MX.rosa} stopOpacity={0.22} />
-                    <stop offset="100%" stopColor={MX.rosa} stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
-                <XAxis dataKey="p" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={xTickIMSS} interval={0} />
-                <YAxis tick={axTick()} axisLine={false} tickLine={false}
-                  tickFormatter={v => `${(v/1000).toFixed(0)}k`} domain={[0, 470000]} />
-                <Tooltip content={<TtComp />} />
-                <Legend iconType="circle" iconSize={7} formatter={legFmt} />
-                <Area type="monotone" dataKey="perm" fill="url(#grdPermComp)" stroke="none" legendType="none" />
-                <Area type="monotone" dataKey="ev"   fill="url(#grdEvComp)"   stroke="none" legendType="none" />
-                <Line type="monotone" dataKey="perm" name="Permanentes" stroke={MX.vino} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.vino, stroke: MX.white, strokeWidth: 2 }} />
-                <Line type="monotone" dataKey="ev"   name="Eventuales"  stroke={MX.rosa} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.rosa, stroke: MX.white, strokeWidth: 2 }} strokeDasharray="5 3" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
+      <Section
+        title="Puestos de Trabajo"
+        sub="IMSS Mensual 2023–2024"
+        options={[
+          { id:"tot",  label:"Total"       },
+          { id:"perm", label:"Permanentes" },
+          { id:"ev",   label:"Eventuales"  },
+          { id:"comp", label:"Comparativo" },
+        ]}
+        active={g1}
+        onChange={setG1}
+        isMobile={isMobile}
+      >
+        <Card title={c1.title} isMobile={isMobile} style={{ width: "100%" }}>
+          <ResponsiveContainer width="100%" height={chartH}>
+            <LineChart data={IMSS_S} margin={{ left: isMobile ? 4 : 14, right: isMobile ? 4 : 20, top: 5, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
+              <XAxis dataKey="p" tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} interval={isMobile ? 2 : 1} />
+              <YAxis tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={v => `${(v/1000).toFixed(0)}k`} domain={c1.domain} width={isMobile ? 30 : 40} />
+              <Tooltip formatter={v => [fmtN(v), ""]} />
+              {c1.lines.length > 1 && <Legend iconType="circle" iconSize={7} formatter={legFmt} />}
+              {c1.lines.map(l => (
+                <Line key={l.key} type="monotone" dataKey={l.key} name={l.name} stroke={l.color} strokeWidth={2.5} dot={{ r: 3, fill: l.color }} activeDot={{ r: 5 }} />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
       </Section>
 
-      {/* Sección 2 — Desglose por zona */}
-      <Section title="Desglose por zona" sub="Permanentes y Eventuales"
-        options={[{ id:"urb", label:"Zona Urbana" }, { id:"campo", label:"Zona Campo" }]}
-        active={g2} onChange={setG2}>
-
-        {/* URBANO: eje único — permanentes (~390k) visualmente más altos que eventuales (~60k) */}
-        {g2 === "urb" && (
-          <Card title="Zona Urbana — Permanentes y Eventuales" style={{ width: "100%" }}>
-            <ResponsiveContainer width="100%" height={240}>
-              <ComposedChart data={dataUrb} margin={{ left: 14, right: 20, top: 5, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="grdPermUrb" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={MX.vino} stopOpacity={0.08} />
-                    <stop offset="100%" stopColor={MX.vino} stopOpacity={0.01} />
-                  </linearGradient>
-                  <linearGradient id="grdEvUrb" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={MX.rosa} stopOpacity={0.25} />
-                    <stop offset="100%" stopColor={MX.rosa} stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
-                <XAxis dataKey="p" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={xTickIMSS} interval={0} />
-                <YAxis tick={axTick()} axisLine={false} tickLine={false}
-                  tickFormatter={v => `${(v/1000).toFixed(0)}k`} domain={[0, 430000]} />
-                <Tooltip content={<TtUrb />} />
-                <Legend iconType="circle" iconSize={7} formatter={legFmt} />
-                <Area type="monotone" dataKey="perm_urb" fill="url(#grdPermUrb)" stroke="none" legendType="none" />
-                <Area type="monotone" dataKey="ev_urb"   fill="url(#grdEvUrb)"   stroke="none" legendType="none" />
-                <Line type="monotone" dataKey="perm_urb" name="Permanentes Urbanos" stroke={MX.vino} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.vino, stroke: MX.white, strokeWidth: 2 }} />
-                <Line type="monotone" dataKey="ev_urb"   name="Eventuales Urbanos" stroke={MX.rosa} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.rosa, stroke: MX.white, strokeWidth: 2 }} strokeDasharray="5 3" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
-
-        {/* CAMPO: perm_campo (~20-37k) y ev_campo (~13-30k) — escalas similares, eje único */}
-        {g2 === "campo" && (
-          <Card title="Zona Campo — Permanentes y Eventuales" style={{ width: "100%" }}>
-            <ResponsiveContainer width="100%" height={240}>
-              <ComposedChart data={dataEvCampo} margin={{ left: 14, right: 20, top: 5, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="grdPermCampo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={MX.vino} stopOpacity={0.08} />
-                    <stop offset="100%" stopColor={MX.vino} stopOpacity={0.01} />
-                  </linearGradient>
-                  <linearGradient id="grdEvCampo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={MX.rosa} stopOpacity={0.25} />
-                    <stop offset="100%" stopColor={MX.rosa} stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
-                <XAxis dataKey="p" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={xTickIMSS} interval={0} />
-                <YAxis tick={axTick()} axisLine={false} tickLine={false}
-                  tickFormatter={v => `${(v/1000).toFixed(0)}k`} domain={[0, 40000]} />
-                <Tooltip content={<TtCampo />} />
-                <Legend iconType="circle" iconSize={7} formatter={legFmt} />
-                <Area type="monotone" dataKey="perm_campo" fill="url(#grdPermCampo)" stroke="none" legendType="none" />
-                <Area type="monotone" dataKey="ev_campo"   fill="url(#grdEvCampo)"   stroke="none" legendType="none" />
-                <Line type="monotone" dataKey="perm_campo" name="Permanentes Campo" stroke={MX.vino} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.vino, stroke: MX.white, strokeWidth: 2 }} />
-                <Line type="monotone" dataKey="ev_campo"   name="Eventuales Campo"  stroke={MX.rosa} strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: MX.rosa, stroke: MX.white, strokeWidth: 2 }} strokeDasharray="5 3" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </Card>
-        )}
+      <Section
+        title="Desglose detallado"
+        sub=""
+        options={[
+          { id:"ev",   label:"Eventuales · Campo vs Urbano"     },
+          { id:"perm", label:"Permanentes · Hombres vs Mujeres" },
+        ]}
+        active={g2}
+        onChange={setG2}
+        isMobile={isMobile}
+      >
+        <Card title={c2.title} isMobile={isMobile} style={{ width: "100%" }}>
+          <ResponsiveContainer width="100%" height={chartH}>
+            <LineChart data={IMSS_S} margin={{ left: isMobile ? 4 : 14, right: isMobile ? 4 : 20, top: 5, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
+              <XAxis dataKey="p" tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} interval={isMobile ? 2 : 1} />
+              <YAxis tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} tickFormatter={v => `${(v/1000).toFixed(0)}k`} width={isMobile ? 30 : 40} />
+              <Tooltip formatter={v => [fmtN(v), ""]} />
+              <Legend iconType="circle" iconSize={7} formatter={legFmt} />
+              {c2.lines.map(l => (
+                <Line key={l.key} type="monotone" dataKey={l.key} name={l.name} stroke={l.color} strokeWidth={2.5} dot={{ r: 3, fill: l.color }} activeDot={{ r: 5 }} strokeDasharray={l.dash || "0"} />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
       </Section>
 
       <div style={{ fontFamily: FONT, fontSize: 9, color: MX.grayMid, textAlign: "right" }}>
-        Fuente: IMSS CUBOS · imss.gob.mx · 2016–2026
+        Fuente: IMSS CUBOS · imss.gob.mx · Datos ilustrativos
       </div>
     </div>
   );
@@ -1604,110 +759,48 @@ function TabIMSS() {
 // ════════════════════════════════════════════════════════════════════════════
 //  TAB SECTORES
 // ════════════════════════════════════════════════════════════════════════════
-
-// Etiquetas IMSS para subsectores
-const ETIQ_IMSS = {
-  agric:        "Agricultura, Ganadería, Silvicultura y Pesca",
-  ind_ext:      "Industrias Extractivas",
-  transf_1:     "Ind. de Transformación (alimentos / textil)",
-  transf_2:     "Ind. de Transformación (química / metal)",
-  construccion: "Industria de la Construcción",
-  electrica:    "Ind. Eléctrica y Captación de Agua",
-  comercio:     "Comercio",
-  transportes:  "Transportes y Comunicaciones",
-  serv_empresas:"Servicios para Empresas y Personas",
-  serv_soc:     "Servicios Sociales y Comunales",
-};
-
-function TabSectores() {
+function TabSectores({ isMobile }) {
   const [pie, setPie] = useState("enoe");
   const [bar, setBar] = useState("enoe");
-
-  // ── Sección 1: Pie grandes sectores ──────────────────────────────────────
-  const lastS41G = ENOE_S41_GRANDES[ENOE_S41_GRANDES.length - 1];
-  const totENOE  = lastS41G.primario + lastS41G.secundario + lastS41G.terciario;
-  const pieENOE  = [
-    { s:"Primario",   v:+(lastS41G.primario  /totENOE*100).toFixed(1), c:MX.vino    },
-    { s:"Secundario", v:+(lastS41G.secundario/totENOE*100).toFixed(1), c:MX.rosa    },
-    { s:"Terciario",  v:+(lastS41G.terciario /totENOE*100).toFixed(1), c:MX.rosaLt  },
-  ];
-  const lastIMSSG = IMSS_GRANDES_ENE26[0];
-  const totIMSS   = lastIMSSG.primario + lastIMSSG.secundario + lastIMSSG.terciario;
-  const pieIMSS   = [
-    { s:"Primario",   v:+(lastIMSSG.primario  /totIMSS*100).toFixed(1), c:MX.vino    },
-    { s:"Secundario", v:+(lastIMSSG.secundario/totIMSS*100).toFixed(1), c:MX.rosa    },
-    { s:"Terciario",  v:+(lastIMSSG.terciario /totIMSS*100).toFixed(1), c:MX.rosaLt  },
-  ];
-  const pieData = pie === "enoe" ? pieENOE : pieIMSS;
-
-  // ── Sección 2: Barras subsectores ─────────────────────────────────────────
-  // ENOE — selector trimestre/año (igual que GrafSubsectores)
-  const periodos   = ENOE_S41_SUBSECTORES.map(d => d.p);
-  const años       = [...new Set(periodos.map(p => p.split(" ")[1]))];
-  const trimestres = ["I", "II", "III", "IV"];
-  const lastP      = periodos[periodos.length - 1].split(" ");
-  const [trim, setTrim] = useState(lastP[0]);
-  const [anio, setAnio] = useState(lastP[1]);
-  const perKey   = `${trim} ${anio}`;
-  const perValid = periodos.includes(perKey) ? perKey : periodos[periodos.length - 1];
-  const rowENOE  = ENOE_S41_SUBSECTORES.find(d => d.p === perValid) || {};
-  const barENOE  = Object.keys(ETIQ)
-    .map(k => ({ label: ETIQ[k], val: rowENOE[k] ?? 0 }))
-    .sort((a, b) => b.val - a.val);
-
-  // IMSS — punto fijo Ene 26
-  const rowIMSS  = IMSS_SECTORES_ENE26[0];
-  const barIMSS  = Object.keys(ETIQ_IMSS)
-    .map(k => ({ label: ETIQ_IMSS[k], val: rowIMSS[k] ?? 0 }))
-    .sort((a, b) => b.val - a.val);
-
-  const barData  = bar === "enoe" ? barENOE : barIMSS;
-  const barColor = i => i < 3 ? MX.vino : i < 7 ? MX.rosa : MX.neutral;
-
-  const selectStyle = {
-    fontFamily: FONT, fontSize: 11, fontWeight: 600, cursor: "pointer",
-    padding: "5px 12px", borderRadius: 20, border: `1.5px solid ${MX.vino}`,
-    color: MX.vino, background: MX.crema, outline: "none", appearance: "none",
-    WebkitAppearance: "none", paddingRight: 28,
-  };
-
-  const TooltipSub2 = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div style={{ fontFamily: FONT, background: MX.white, border: `1px solid ${MX.border}`, borderRadius: 8, padding: "10px 14px", boxShadow: "0 4px 16px rgba(107,23,55,0.12)", fontSize: 11 }}>
-        <div style={{ fontWeight: 700, color: MX.vino, marginBottom: 4 }}>{label}</div>
-        <b style={{ color: MX.grayDark }}>{fmtN(payload[0]?.value)}</b> {bar === "enoe" ? "personas" : "asegurados"}
-      </div>
-    );
-  };
+  const pieData = pie === "enoe" ? SEC_E : SEC_I;
+  const barData = bar === "enoe" ? SEC_E : SEC_I;
+  const pieR    = isMobile ? 80 : 100;
+  const pieH    = isMobile ? 210 : 250;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
-      {/* SECCIÓN 1 — Pie grandes sectores */}
-      <Section title="Distribución por sector" sub="Comparativo ENOE · IMSS"
-        options={[{id:"enoe",label:"Vista ENOE"},{id:"imss",label:"Vista IMSS"}]}
-        active={pie} onChange={setPie}>
-        <Card title={pie==="enoe"
-          ? `ENOE — Trabajadores subordinados y remunerados por sector (${perValid})`
-          : "IMSS — Asegurados por gran sector (Ene 26)"} style={{ width: "100%" }}>
-          <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
-            <div style={{ flex: "0 0 310px" }}>
-              <ResponsiveContainer width={310} height={250}>
+    <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? 18 : 24 }}>
+      <Section
+        title="Distribución por sector"
+        sub="Comparativo ENOE · IMSS"
+        options={[{ id:"enoe", label:"Vista ENOE" }, { id:"imss", label:"Vista IMSS" }]}
+        active={pie}
+        onChange={setPie}
+        isMobile={isMobile}
+      >
+        <Card
+          title={pie === "enoe" ? "ENOE — Ocupados por sector (% del total)" : "IMSS — Asegurados por sector (% del total)"}
+          isMobile={isMobile}
+          style={{ width: "100%" }}
+        >
+          {/* En mobile: pie arriba, leyenda abajo */}
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 12 : 32, alignItems: "center" }}>
+            <div style={{ width: "100%", maxWidth: isMobile ? "100%" : 310 }}>
+              <ResponsiveContainer width="100%" height={pieH}>
                 <PieChart>
-                  <Pie data={pieData} dataKey="v" nameKey="s" cx="50%" cy="50%" outerRadius={100} paddingAngle={2} label={<PieLabel />} labelLine={false}>
+                  <Pie data={pieData} dataKey="v" nameKey="s" cx="50%" cy="50%" outerRadius={pieR} paddingAngle={2} label={<PieLabel />} labelLine={false}>
                     {pieData.map((d, i) => <Cell key={i} fill={d.c} />)}
                   </Pie>
                   <Tooltip formatter={v => [`${v}%`, ""]} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {/* Leyenda */}
+            <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", flexWrap: "wrap", gap: isMobile ? "8px 16px" : 10, justifyContent: isMobile ? "center" : "flex-start" }}>
               {pieData.map((d, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 12, height: 12, borderRadius: "50%", background: d.c, flexShrink: 0 }} />
-                  <span style={{ fontFamily: FONT, fontSize: 11, color: MX.grayDark, fontWeight: 600 }}>{d.s}</span>
-                  <span style={{ fontFamily: FONT, fontSize: 11, color: MX.grayMid }}>{d.v}%</span>
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: d.c, flexShrink: 0 }} />
+                  <span style={{ fontFamily: FONT, fontSize: 10, color: MX.grayDark, fontWeight: 600 }}>{d.s}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 10, color: MX.grayMid }}>{d.v}%</span>
                 </div>
               ))}
             </div>
@@ -1715,63 +808,36 @@ function TabSectores() {
         </Card>
       </Section>
 
-      {/* SECCIÓN 2 — Barras por subsector */}
-      <Section title="Distribución por Sector de Actividad Económica"
-        options={[{id:"enoe",label:"Vista ENOE"},{id:"imss",label:"Vista IMSS"}]}
-        active={bar} onChange={setBar}>
-
-        <Card style={{ width: "100%" }}>
-          {/* Encabezado con selector período (solo ENOE) */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-            <div style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: MX.vino }}>
-              {bar === "enoe"
-                ? "ENOE — Trabajadores subordinados y remunerados por subsector"
-                : "IMSS — Asegurados por rama de actividad (Ene 26)"}
-            </div>
-            {bar === "enoe" && (
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <div style={{ position: "relative" }}>
-                  <select value={trim} onChange={e => setTrim(e.target.value)} style={selectStyle}>
-                    {trimestres.map(t => <option key={t} value={t}>{t === "I" ? "I Trim." : t === "II" ? "II Trim." : t === "III" ? "III Trim." : "IV Trim."}</option>)}
-                  </select>
-                  <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: MX.vino, fontSize: 10 }}>▾</span>
-                </div>
-                <div style={{ position: "relative" }}>
-                  <select value={anio} onChange={e => setAnio(e.target.value)} style={selectStyle}>
-                    {años.map(a => <option key={a} value={a}>20{a}</option>)}
-                  </select>
-                  <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: MX.vino, fontSize: 10 }}>▾</span>
-                </div>
-                {!periodos.includes(perKey) && (
-                  <span style={{ fontFamily: FONT, fontSize: 9, color: MX.rosa }}>Período no disponible — mostrando {perValid}</span>
-                )}
-              </div>
-            )}
-          </div>
-          <ResponsiveContainer width="100%" height={360}>
-            <BarChart data={barData} layout="vertical" margin={{ left: 10, right: 80, top: 5, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" horizontal={false} />
-              <XAxis type="number" tick={axTick()} axisLine={false} tickLine={false} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
-              <YAxis type="category" dataKey="label" tick={axTick({ fontSize: 9 })} axisLine={false} tickLine={false} width={205} />
-              <Tooltip content={<TooltipSub2 />} />
-              <Bar dataKey="val" name="Trabajadores" radius={[0, 4, 4, 0]}>
-                {barData.map((_, i) => <Cell key={i} fill={barColor(i)} />)}
-                <LabelList dataKey="val" position="right"
-                  style={{ fontFamily: FONT, fontSize: 9, fill: MX.grayDark, fontWeight: 600 }}
-                  formatter={fmtN} />
+      <Section
+        title="Comparativo en barras"
+        sub=""
+        options={[{ id:"enoe", label:"Vista ENOE" }, { id:"imss", label:"Vista IMSS" }]}
+        active={bar}
+        onChange={setBar}
+        isMobile={isMobile}
+      >
+        <Card
+          title={bar === "enoe" ? "ENOE — Ocupados por sector (%)" : "IMSS — Asegurados por sector (%)"}
+          isMobile={isMobile}
+          style={{ width: "100%" }}
+        >
+          <ResponsiveContainer width="100%" height={isMobile ? 200 : 230}>
+            <BarChart data={barData} margin={{ left: 0, right: isMobile ? 10 : 20, top: 10, bottom: isMobile ? 24 : 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" vertical={false} />
+              <XAxis dataKey="s" tick={axTick({ fontSize: isMobile ? 8 : 10 })} axisLine={false} tickLine={false} angle={isMobile ? -30 : 0} textAnchor={isMobile ? "end" : "middle"} interval={0} />
+              <YAxis tick={axTick({ fontSize: isMobile ? 7 : 8 })} axisLine={false} tickLine={false} unit="%" domain={[0, 45]} width={isMobile ? 24 : 32} />
+              <Tooltip formatter={v => [`${v}%`, ""]} />
+              <Bar dataKey="v" name="Participación" radius={[5, 5, 0, 0]}>
+                {barData.map((d, i) => <Cell key={i} fill={d.c} />)}
+                <LabelList dataKey="v" position="top" style={{ fontFamily: FONT, fontSize: isMobile ? 9 : 10, fill: MX.grayDark, fontWeight: 700 }} formatter={v => `${v}%`} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-          {bar === "imss" && (
-            <div style={{ fontFamily: FONT, fontSize: 9, color: MX.grayMid, textAlign: "right", marginTop: 8 }}>
-              Fuente: IMSS CUBOS · Enero 2026 · Delegación Michoacán · 499,842 asegurados totales
-            </div>
-          )}
         </Card>
       </Section>
 
       <div style={{ fontFamily: FONT, fontSize: 9, color: MX.grayMid, textAlign: "right" }}>
-        Fuentes: ENOE (INEGI) · IMSS CUBOS · Michoacán · 2016–2026
+        Fuentes: ENOE (INEGI) · IMSS CUBOS · Datos ilustrativos
       </div>
     </div>
   );
@@ -1782,44 +848,88 @@ function TabSectores() {
 // ════════════════════════════════════════════════════════════════════════════
 export default function App() {
   const [tab, setTab] = useState("enoe");
+  const width   = useWindowWidth();
+  const isMobile = width <= 430;
+  const px = isMobile ? 16 : 36;
+
   return (
     <div style={{ minHeight: "100vh", background: MX.grayLt, fontFamily: FONT, color: MX.grayDark }}>
       {/* HEADER */}
-      <div style={{ background: MX.white, borderBottom: `3px solid ${MX.vino}`, padding: "14px 36px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 3, color: MX.rosa, textTransform: "uppercase", marginBottom: 3 }}>
+      <div style={{
+        background: MX.white,
+        borderBottom: `3px solid ${MX.vino}`,
+        padding: isMobile ? "12px 16px" : "14px 36px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: isMobile ? "flex-start" : "center",
+        gap: isMobile ? 8 : 0,
+      }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: isMobile ? 8 : 9, fontWeight: 700, letterSpacing: isMobile ? 1.5 : 3, color: MX.rosa, textTransform: "uppercase", marginBottom: 3 }}>
             Secretaría de Desarrollo Económico · Michoacán es Mejor
           </div>
-          <div style={{ fontSize: 19, fontWeight: 700, color: MX.vinoDark }}>Dashboard de Indicadores Laborales</div>
+          <div style={{ fontSize: isMobile ? 15 : 19, fontWeight: 700, color: MX.vinoDark, lineHeight: 1.2 }}>
+            Dashboard de Indicadores Laborales
+          </div>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 9, color: MX.grayMid, marginBottom: 3 }}>Último período disponible</div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: MX.vino, background: MX.crema, border: `1px solid ${MX.border}`, borderRadius: 6, padding: "4px 14px" }}>
-            IV Trimestre 2025
+        <div style={{ textAlign: "right", flexShrink: 0 }}>
+          <div style={{ fontSize: 8, color: MX.grayMid, marginBottom: 3 }}>Último período</div>
+          <div style={{
+            fontSize: isMobile ? 10 : 11,
+            fontWeight: 700,
+            color: MX.vino,
+            background: MX.crema,
+            border: `1px solid ${MX.border}`,
+            borderRadius: 6,
+            padding: isMobile ? "4px 10px" : "4px 14px",
+            textAlign: "center",
+          }}>
+            IV Trim. 2025
           </div>
         </div>
       </div>
 
-      {/* TABS PRINCIPALES */}
-      <div style={{ background: MX.white, borderBottom: `1px solid ${MX.border}`, padding: "0 36px", display: "flex" }}>
+      {/* TABS PRINCIPALES — scroll horizontal en mobile */}
+      <div style={{
+        background: MX.white,
+        borderBottom: `1px solid ${MX.border}`,
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none",
+        display: "flex",
+        paddingLeft: isMobile ? 0 : 36,
+      }}>
+        <style>{`.tab-scroll::-webkit-scrollbar { display: none; }`}</style>
         {NAV.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            fontFamily: FONT, background: "transparent", border: "none",
+            fontFamily: FONT,
+            background: "transparent",
+            border: "none",
             borderBottom: tab === t.id ? `3px solid ${MX.vino}` : "3px solid transparent",
-            padding: "12px 22px", cursor: "pointer", transition: "all .15s",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+            padding: isMobile ? "10px 16px" : "12px 22px",
+            cursor: "pointer",
+            transition: "all .15s",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            flexShrink: 0,
           }}>
-            <span style={{ fontSize: 12, fontWeight: tab === t.id ? 700 : 400, color: tab === t.id ? MX.vino : MX.grayMid }}>{t.label}</span>
-            <span style={{ fontSize: 9, color: tab === t.id ? MX.rosa : "#ccc" }}>{t.sub}</span>
+            <span style={{ fontSize: isMobile ? 11 : 12, fontWeight: tab === t.id ? 700 : 400, color: tab === t.id ? MX.vino : MX.grayMid, whiteSpace: "nowrap" }}>
+              {t.label}
+            </span>
+            <span style={{ fontSize: 9, color: tab === t.id ? MX.rosa : "#ccc", whiteSpace: "nowrap" }}>
+              {t.sub}
+            </span>
           </button>
         ))}
       </div>
 
       {/* CONTENIDO */}
-      <div style={{ padding: "24px 36px" }}>
-        {tab === "enoe"     && <TabENOE />}
-        {tab === "imss"     && <TabIMSS />}
-        {tab === "sectores" && <TabSectores />}
+      <div style={{ padding: isMobile ? "16px 16px 32px" : "24px 36px" }}>
+        {tab === "enoe"     && <TabENOE     isMobile={isMobile} />}
+        {tab === "imss"     && <TabIMSS     isMobile={isMobile} />}
+        {tab === "sectores" && <TabSectores isMobile={isMobile} />}
       </div>
     </div>
   );
