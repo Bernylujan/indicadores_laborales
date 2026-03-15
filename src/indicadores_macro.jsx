@@ -1075,6 +1075,7 @@ const IMSS_PT_TOTAL = [
   { p: "Nov 25", tot: 498624 },
   { p: "Dic 25", tot: 496049 },
   { p: "Ene 26", tot: 499842 },
+  { p: "Feb 26", tot: 501402 },
 ];
 const IMSS_PT_PERM = [
   { p: "Ene 16", perm: 319312 },
@@ -1198,6 +1199,7 @@ const IMSS_PT_PERM = [
   { p: "Nov 25", perm: 418734 },
   { p: "Dic 25", perm: 416572 },
   { p: "Ene 26", perm: 417607 },
+  { p: "Feb 26", perm: 418350 },
 ];
 const IMSS_PT_EV = [
   { p: "Ene 16", ev: 64453 },
@@ -1321,6 +1323,7 @@ const IMSS_PT_EV = [
   { p: "Nov 25", ev: 79890 },
   { p: "Dic 25", ev: 79477 },
   { p: "Ene 26", ev: 82235 },
+  { p: "Feb 26", ev: 83052 },
 ];
 const IMSS_PT_EV_CAMPO = [
   { p: "Ene 16", ev_campo: 16637 },
@@ -1444,6 +1447,7 @@ const IMSS_PT_EV_CAMPO = [
   { p: "Nov 25", ev_campo: 22647 },
   { p: "Dic 25", ev_campo: 23787 },
   { p: "Ene 26", ev_campo: 25470 },
+  { p: "Feb 26", ev_campo: 25104 },
 ];
 const IMSS_PT_EV_URB = [
   { p: "Ene 16", ev_urb: 47816 },
@@ -1567,6 +1571,7 @@ const IMSS_PT_EV_URB = [
   { p: "Nov 25", ev_urb: 57243 },
   { p: "Dic 25", ev_urb: 55690 },
   { p: "Ene 26", ev_urb: 56765 },
+  { p: "Feb 26", ev_urb: 57948 },
 ];
 const IMSS_PT_PERM_CAMPO = [
   { p: "Ene 16", perm_campo: 20878 },
@@ -1690,6 +1695,7 @@ const IMSS_PT_PERM_CAMPO = [
   { p: "Nov 25", perm_campo: 28739 },
   { p: "Dic 25", perm_campo: 29166 },
   { p: "Ene 26", perm_campo: 29442 },
+  { p: "Feb 26", perm_campo: 29285 },
 ];
 const IMSS_PT_PERM_URB = [
   { p: "Ene 16", perm_urb: 298434 },
@@ -1813,6 +1819,7 @@ const IMSS_PT_PERM_URB = [
   { p: "Nov 25", perm_urb: 389995 },
   { p: "Dic 25", perm_urb: 387406 },
   { p: "Ene 26", perm_urb: 388165 },
+  { p: "Feb 26", perm_urb: 389065 },
 ];
 
 // ─── SECTORES (ilustrativos) ─────────────────────────────────────────────────
@@ -2616,22 +2623,36 @@ const ENOE_S41_SUBSECTORES = [
 // ════════════════════════════════════════════════════════════════════════════
 const IMSS_SECTORES_ENE26 = [
   {
-    p: "Ene 26",
-    agric: 60127,
-    ind_ext: 1601,
-    transf_1: 53592,
-    transf_2: 27321,
-    construccion: 32943,
-    electrica: 5504,
-    comercio: 123158,
-    transportes: 28276,
-    serv_empresas: 65753,
-    serv_soc: 101567,
+    p: "Feb 26",
+    agric: 60013,
+    ind_ext: 1582,
+    transf_1: 54286,
+    transf_2: 27675,
+    construccion: 32701,
+    electrica: 5490,
+    comercio: 124061,
+    transportes: 28141,
+    serv_empresas: 65004,
+    serv_soc: 102449,
   },
 ];
 
 const IMSS_GRANDES_ENE26 = [
-  { p: "Ene 26", primario: 61728, secundario: 119360, terciario: 318754 },
+  { p: "Feb 26", primario: 60013, secundario: 121734, terciario: 319655 },
+];
+
+// Top 10 municipios por empleo formal — Febrero 2026 (SBC = Salario Base de Cotización)
+const IMSS_TOP10_MUN = [
+  { municipio: "Morelia",          empleo: 196514, sbc: 589.85 },
+  { municipio: "Uruapan",          empleo:  58570, sbc: 503.75 },
+  { municipio: "Zamora",           empleo:  39898, sbc: 500.48 },
+  { municipio: "Lázaro Cárdenas", empleo:  38117, sbc: 747.17 },
+  { municipio: "La Piedad",        empleo:  13732, sbc: 559.57 },
+  { municipio: "Jacona",           empleo:  12564, sbc: 495.37 },
+  { municipio: "Tarímbaro",        empleo:  11921, sbc: 474.50 },
+  { municipio: "Los Reyes",        empleo:  11255, sbc: 458.26 },
+  { municipio: "Zitácuaro",        empleo:  10063, sbc: 527.80 },
+  { municipio: "Tangancícuaro",    empleo:   7951, sbc: 417.24 },
 ];
 
 const SEC_E = [
@@ -3763,7 +3784,7 @@ function TabIMSS({ isMobile }) {
       fmt: "k",
       delta: fmtDelta(lastTot, prevTot),
       dDir: lastTot >= prevTot ? "pos" : "neg",
-      nota: "Puestos de trabajo IMSS (Ene 26)",
+      nota: "Puestos de trabajo IMSS (Feb 26)",
       color: MX.vino,
     },
     {
@@ -3788,7 +3809,7 @@ function TabIMSS({ isMobile }) {
       label: "Permanentes / Total",
       valor: (lastPerm / lastTot) * 100,
       fmt: "pct",
-      nota: "Proporción de trabajadores permanentes (Ene 26)",
+      nota: "Proporción de trabajadores permanentes (Feb 26)",
       color: MX.vino,
     },
   ];
@@ -3832,7 +3853,7 @@ function TabIMSS({ isMobile }) {
 
   // ── Puestos de Trabajo — pestaña "anual" ────────────────────────────────
   const barData = filterIMSS(IMSS_PT_TOTAL)
-    .filter((d) => d.p.startsWith("Ene"))
+    .filter((d) => d.p === "Feb 26" || (d.p.startsWith("Ene") && d.p !== "Ene 26"))
     .map((d) => ({ ...d, anio: "20" + d.p.slice(-2) }));
 
   // ⚠️  renderLabel: etiqueta sobre cada barra del Total Anual
@@ -3858,11 +3879,11 @@ function TabIMSS({ isMobile }) {
     );
   };
 
-  // ── Datos anuales (enero de cada año) para barras apiladas ────────────
+  // ── Datos anuales (enero de cada año, feb para 2026) para barras apiladas ─
   // ⚠️  Todas las gráficas de la sección IMSS usan datos anuales (enero)
   const toAnual = (arr) =>
     arr
-      .filter((d) => d.p.startsWith("Ene"))
+      .filter((d) => d.p === "Feb 26" || (d.p.startsWith("Ene") && d.p !== "Ene 26"))
       .map((d) => ({ ...d, anio: "20" + d.p.slice(-2) }));
 
   const compDataAnual = toAnual(
