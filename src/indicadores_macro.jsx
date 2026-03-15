@@ -3569,7 +3569,7 @@ function GrafSubsectores({ isMobile }) {
             tick={axTick({ fontSize: isMobile ? 7 : 8 })}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+            tickFormatter={(v) => `${Math.floor(v / 1000)} mil`}
           />
           <YAxis
             type="category"
@@ -3594,7 +3594,7 @@ function GrafSubsectores({ isMobile }) {
                 fontWeight: 600,
               }}
               /* ⚠️  formato de etiqueta de valor: "483 mil" en todos los tamaños */
-              formatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+              formatter={(v) => `${Math.floor(v / 1000)} mil`}
             />
           </Bar>
         </BarChart>
@@ -3836,13 +3836,13 @@ function TabIMSS({ isMobile }) {
     .map((d) => ({ ...d, anio: "20" + d.p.slice(-2) }));
 
   // ⚠️  renderLabel: etiqueta sobre cada barra del Total Anual
+  // Usa Math.floor para evitar redondeo (499,842 → "499 mil", no "500 mil")
   // isLast = último año recibe énfasis visual (mayor tamaño y color vino)
   const renderLabel = (props) => {
     const { x, y, width, value, index } = props;
     const isLast = index === barData.length - 1;
-    const label = isMobile
-      ? `${(value / 1000).toFixed(0)}k`
-      : `${(value / 1000).toFixed(0)} mil`;
+    const enMiles = Math.floor(value / 1000);
+    const label = `${enMiles}\u00A0mil`;
     return (
       <text
         x={x + width / 2}
@@ -3948,24 +3948,30 @@ function TabIMSS({ isMobile }) {
       >
         {g1 === "anual" && (
           // ⚠️  Colores alternos: par = vino, impar = vinoMid
-          // ⚠️  barCategoryGap controla el espacio entre barras
-          // ⚠️  interval en XAxis mobile: omite un año de cada 2 para no saturar
+          // ⚠️  barCategoryGap="28%" → espacio claro entre barras
+          // ⚠️  YAxis visible con ticks en "mil" para estandarizar la vista
+          // ⚠️  interval XAxis mobile: omite un año de cada 2 para no saturar
           <Card
             title="Total de Puestos de Trabajo Asegurados (enero de cada año)"
             isMobile={isMobile}
             style={{ width: "100%" }}
           >
-            <ResponsiveContainer width="100%" height={isMobile ? 240 : 300}>
+            <ResponsiveContainer width="100%" height={isMobile ? 260 : 320}>
               <BarChart
                 data={barData}
-                barCategoryGap="18%"
+                barCategoryGap="28%"
                 margin={{
-                  left: isMobile ? 4 : 10,
+                  left: isMobile ? 0 : 4,
                   right: isMobile ? 4 : 10,
-                  top: 32,
+                  top: 28,
                   bottom: 0,
                 }}
               >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#F0E8EC"
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="anio"
                   tick={axTick({ fontSize: isMobile ? 8 : 9 })}
@@ -3974,13 +3980,15 @@ function TabIMSS({ isMobile }) {
                   interval={isMobile ? 1 : 0}
                 />
                 <YAxis
-                  tick={false}
+                  tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                   axisLine={false}
                   tickLine={false}
-                  domain={["auto", "auto"]}
+                  tickFormatter={(v) => `${Math.floor(v / 1000)} mil`}
+                  domain={[350000, 520000]}
+                  width={isMobile ? 38 : 52}
                 />
                 <Tooltip content={<TooltipBar />} />
-                <Bar dataKey="tot" radius={[6, 6, 0, 0]}>
+                <Bar dataKey="tot" radius={[5, 5, 0, 0]}>
                   {barData.map((_, i) => (
                     <Cell key={i} fill={i % 2 === 0 ? MX.vino : MX.vinoMid} />
                   ))}
@@ -4026,7 +4034,7 @@ function TabIMSS({ isMobile }) {
                   tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                  tickFormatter={(v) => `${Math.floor(v / 1000)} mil`}
                   domain={[0, 520000]}
                   width={isMobile ? 38 : 52}
                 />
@@ -4107,7 +4115,7 @@ function TabIMSS({ isMobile }) {
                   tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                  tickFormatter={(v) => `${Math.floor(v / 1000)} mil`}
                   domain={[0, 480000]}
                   width={isMobile ? 38 : 52}
                 />
@@ -4183,7 +4191,7 @@ function TabIMSS({ isMobile }) {
                   tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                  tickFormatter={(v) => `${Math.floor(v / 1000)} mil`}
                   domain={[0, 70000]}
                   width={isMobile ? 38 : 52}
                 />
@@ -4623,7 +4631,7 @@ function TabSectores({ isMobile }) {
                 tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                tickFormatter={(v) => `${Math.floor(v / 1000)} mil`}
               />
               <YAxis
                 type="category"
@@ -4648,7 +4656,7 @@ function TabSectores({ isMobile }) {
                     fontWeight: 600,
                   }}
                   /* ⚠️  formato de etiqueta de valor: "483 mil" en todos los tamaños */
-                  formatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                  formatter={(v) => `${Math.floor(v / 1000)} mil`}
                 />
               </Bar>
             </BarChart>
