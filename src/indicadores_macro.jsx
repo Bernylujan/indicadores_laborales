@@ -3138,7 +3138,15 @@ function GrafPEAOcupados({ isMobile }) {
             width={isMobile ? 36 : 46}
           />
           <Tooltip content={<TooltipPEA />} />
-          <Legend iconType="circle" iconSize={7} formatter={legFmt} />
+          <Legend
+            iconType="circle"
+            iconSize={7}
+            formatter={legFmt}
+            payload={[
+              { value: "PEA", type: "circle", color: MX.vino },
+              { value: "Población Ocupada", type: "circle", color: MX.rosa },
+            ]}
+          />
           <Area
             type="monotone"
             dataKey="pea"
@@ -3270,7 +3278,15 @@ function GrafTasas({ isMobile }) {
             width={isMobile ? 24 : 30}
           />
           <Tooltip content={<TooltipTasas />} />
-          <Legend iconType="circle" iconSize={7} formatter={legFmt} />
+          <Legend
+            iconType="circle"
+            iconSize={7}
+            formatter={legFmt}
+            payload={[
+              { value: "T. Participación", type: "circle", color: MX.vino },
+              { value: "T. Desocupación", type: "circle", color: MX.rosa },
+            ]}
+          />
           <ReferenceLine
             yAxisId="L"
             y={mediaPartic}
@@ -3709,11 +3725,11 @@ function TabENOE({ isMobile }) {
 //  BLOQUE 8 · TAB IMSS — Empleo Formal
 // ────────────────────────────────────────────────────────────────────────────
 //  Sección 1 · Puestos de Trabajo:
-//    pill "Total Anual"             →  BarChart vertical (enero de cada año)
-//    pill "Permanentes vs Eventuales" →  ComposedChart doble serie
+//    pill "Total Anual"               →  BarChart colores alternos (enero c/año)
+//    pill "Permanentes vs Eventuales" →  BarChart apilado anual (perm + ev)
 //  Sección 2 · Desglose por zona:
-//    pill "Zona Urbana"             →  ComposedChart perm_urb + ev_urb
-//    pill "Zona Campo"              →  ComposedChart perm_campo + ev_campo
+//    pill "Zona Urbana"  →  BarChart apilado anual (perm_urb + ev_urb)
+//    pill "Zona Campo"   →  BarChart apilado anual (perm_campo + ev_campo)
 //  ⚠️  KPIs se calculan automáticamente del último registro de cada array IMSS_PT_*
 //  ⚠️  filterIMSS: filtra los datos de la serie para el rango 2016–2026
 //  ⚠️  makeTooltip(labelMap): genera tooltip deduplicado para ComposedChart
@@ -3796,11 +3812,6 @@ function TabIMSS({ isMobile }) {
         }));
       return <BaseTooltip label={label} rows={rows} />;
     };
-  const TtComp = makeTooltip({ perm: "Permanentes", ev: "Eventuales" });
-  const TtUrb = makeTooltip({
-    perm_urb: "Permanentes Urbanos",
-    ev_urb: "Eventuales Urbanos",
-  });
 
   const TooltipBar = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -3824,35 +3835,80 @@ function TabIMSS({ isMobile }) {
     .filter((d) => d.p.startsWith("Ene"))
     .map((d) => ({ ...d, anio: "20" + d.p.slice(-2) }));
 
+  // ⚠️  renderLabel: etiqueta sobre cada barra del Total Anual
+  // isLast = último año recibe énfasis visual (mayor tamaño y color vino)
   const renderLabel = (props) => {
     const { x, y, width, value, index } = props;
     const isLast = index === barData.length - 1;
+    const label = isMobile
+      ? `${(value / 1000).toFixed(0)}k`
+      : `${(value / 1000).toFixed(0)} mil`;
     return (
       <text
         x={x + width / 2}
-        y={y - 6}
+        y={y - 5}
         textAnchor="middle"
         fontFamily={FONT}
-        fontSize={isLast ? 11 : 9}
+        fontSize={isLast ? (isMobile ? 9 : 10) : isMobile ? 7 : 8}
         fontWeight={isLast ? 700 : 600}
         fill={isLast ? MX.vino : MX.grayDark}
       >
-        {fmtN(value)}
+        {label}
       </text>
     );
   };
 
-  // ── Puestos de Trabajo — pestaña "comp" — doble eje ─────────────────────
-  // perm: ~320k–420k  |  ev: ~64k–88k  → escalas muy distintas, dual axis
-  const compData = filterIMSS(mergeByPeriod(IMSS_PT_PERM, IMSS_PT_EV));
-  const xTickIMSS = (v) => (v && v.startsWith("Ene") ? "20" + v.slice(-2) : "");
+  // ── Datos anuales (enero de cada año) para barras apiladas ────────────
+  // ⚠️  Todas las gráficas de la sección IMSS usan datos anuales (enero)
+  const toAnual = (arr) =>
+    arr
+      .filter((d) => d.p.startsWith("Ene"))
+      .map((d) => ({ ...d, anio: "20" + d.p.slice(-2) }));
 
-  // ── Desglose — datos ────────────────────────────────────────────────────
-  const dataUrb = filterIMSS(mergeByPeriod(IMSS_PT_PERM_URB, IMSS_PT_EV_URB));
-  const dataEvCampo = filterIMSS(
-    mergeByPeriod(IMSS_PT_PERM_CAMPO, IMSS_PT_EV_CAMPO),
+  const compDataAnual = toAnual(
+    filterIMSS(mergeByPeriod(IMSS_PT_PERM, IMSS_PT_EV)),
   );
-  const TtCampo = makeTooltip({
+  const dataUrbAnual = toAnual(
+    filterIMSS(mergeByPeriod(IMSS_PT_PERM_URB, IMSS_PT_EV_URB)),
+  );
+  const dataCampoAnual = toAnual(
+    filterIMSS(mergeByPeriod(IMSS_PT_PERM_CAMPO, IMSS_PT_EV_CAMPO)),
+  );
+
+  // ── Tooltip para barras apiladas — muestra cada segmento + total ────────
+  const TtStacked =
+    (labelMap) =>
+    ({ active, payload, label }) => {
+      if (!active || !payload?.length) return null;
+      const rows = payload.map((p) => ({
+        name: labelMap?.[p.dataKey] || p.name,
+        value: fmtN(p.value),
+        color: p.fill,
+      }));
+      const total = payload.reduce((s, p) => s + (p.value || 0), 0);
+      return (
+        <BaseTooltip
+          label={label}
+          rows={[
+            ...rows,
+            {
+              name: "Total",
+              value: fmtN(total),
+              color: MX.grayDark,
+              sep: true,
+            },
+          ]}
+          rawLabel
+        />
+      );
+    };
+
+  const TtComp = TtStacked({ perm: "Permanentes", ev: "Eventuales" });
+  const TtUrb = TtStacked({
+    perm_urb: "Permanentes Urbanos",
+    ev_urb: "Eventuales Urbanos",
+  });
+  const TtCampo = TtStacked({
     perm_campo: "Permanentes Campo",
     ev_campo: "Eventuales Campo",
   });
@@ -3884,25 +3940,29 @@ function TabIMSS({ isMobile }) {
         sub="IMSS Mensual 2016–2026"
         options={[
           { id: "anual", label: "Total Anual" },
-          { id: "comp", label: "Permanentes vs Eventuales" },
+          { id: "comp", label: "Permanentes vs Eventuales" }, // BarChart apilado anual
         ]}
         active={g1}
         onChange={setG1}
         isMobile={isMobile}
       >
         {g1 === "anual" && (
+          // ⚠️  Colores alternos: par = vino, impar = vinoMid
+          // ⚠️  barCategoryGap controla el espacio entre barras
+          // ⚠️  interval en XAxis mobile: omite un año de cada 2 para no saturar
           <Card
             title="Total de Puestos de Trabajo Asegurados (enero de cada año)"
             isMobile={isMobile}
             style={{ width: "100%" }}
           >
-            <ResponsiveContainer width="100%" height={isMobile ? 230 : 280}>
+            <ResponsiveContainer width="100%" height={isMobile ? 240 : 300}>
               <BarChart
                 data={barData}
+                barCategoryGap="18%"
                 margin={{
                   left: isMobile ? 4 : 10,
                   right: isMobile ? 4 : 10,
-                  top: 28,
+                  top: 32,
                   bottom: 0,
                 }}
               >
@@ -3920,7 +3980,10 @@ function TabIMSS({ isMobile }) {
                   domain={["auto", "auto"]}
                 />
                 <Tooltip content={<TooltipBar />} />
-                <Bar dataKey="tot" fill={MX.vino} radius={[6, 6, 0, 0]}>
+                <Bar dataKey="tot" radius={[6, 6, 0, 0]}>
+                  {barData.map((_, i) => (
+                    <Cell key={i} fill={i % 2 === 0 ? MX.vino : MX.vinoMid} />
+                  ))}
                   <LabelList dataKey="tot" content={renderLabel} />
                 </Bar>
               </BarChart>
@@ -3929,102 +3992,69 @@ function TabIMSS({ isMobile }) {
         )}
 
         {g1 === "comp" && (
+          // ⚠️  Barras apiladas anuales: perm (vino) + ev (rosa)
+          // ⚠️  Dominio Y: [0, 520000] = 520 mil | datos: enero de cada año
           <Card
-            title="Permanentes vs Eventuales — serie mensual"
+            title="Permanentes vs Eventuales — comparativo anual"
             isMobile={isMobile}
             style={{ width: "100%" }}
           >
-            <ResponsiveContainer width="100%" height={isMobile ? 200 : 240}>
-              <ComposedChart
-                data={compData}
+            <ResponsiveContainer width="100%" height={isMobile ? 230 : 280}>
+              <BarChart
+                data={compDataAnual}
+                barCategoryGap="22%"
                 margin={{
                   left: isMobile ? 4 : 14,
-                  right: isMobile ? 4 : 20,
-                  top: 5,
+                  right: isMobile ? 4 : 14,
+                  top: 16,
                   bottom: 0,
                 }}
               >
-                <defs>
-                  <linearGradient id="grdPermComp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={MX.vino} stopOpacity={0.08} />
-                    <stop
-                      offset="100%"
-                      stopColor={MX.vino}
-                      stopOpacity={0.01}
-                    />
-                  </linearGradient>
-                  <linearGradient id="grdEvComp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={MX.rosa} stopOpacity={0.22} />
-                    <stop
-                      offset="100%"
-                      stopColor={MX.rosa}
-                      stopOpacity={0.02}
-                    />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#F0E8EC"
+                  vertical={false}
+                />
                 <XAxis
-                  dataKey="p"
-                  tick={axTick({ fontSize: isMobile ? 7 : 8 })}
+                  dataKey="anio"
+                  tick={axTick({ fontSize: isMobile ? 8 : 9 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={xTickIMSS}
-                  interval={0}
+                  interval={isMobile ? 1 : 0}
                 />
                 <YAxis
                   tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                  domain={[0, 470000]}
-                  width={isMobile ? 30 : 40}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                  domain={[0, 520000]}
+                  width={isMobile ? 38 : 52}
                 />
                 <Tooltip content={<TtComp />} />
-                <Legend iconType="circle" iconSize={7} formatter={legFmt} />
-                <Area
-                  type="monotone"
-                  dataKey="perm"
-                  fill="url(#grdPermComp)"
-                  stroke="none"
-                  legendType="none"
+                <Legend
+                  iconType="circle"
+                  iconSize={7}
+                  formatter={legFmt}
+                  payload={[
+                    { value: "Permanentes", type: "circle", color: MX.vino },
+                    { value: "Eventuales", type: "circle", color: MX.rosa },
+                  ]}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="ev"
-                  fill="url(#grdEvComp)"
-                  stroke="none"
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="perm"
-                  name="Permanentes"
-                  stroke={MX.vino}
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                    fill: MX.vino,
-                    stroke: MX.white,
-                    strokeWidth: 2,
-                  }}
-                />
-                <Line
-                  type="monotone"
+                <Bar
                   dataKey="ev"
                   name="Eventuales"
-                  stroke={MX.rosa}
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                    fill: MX.rosa,
-                    stroke: MX.white,
-                    strokeWidth: 2,
-                  }}
-                  strokeDasharray="5 3"
+                  stackId="a"
+                  fill={MX.rosa}
+                  radius={[0, 0, 0, 0]}
                 />
-              </ComposedChart>
+                <Bar
+                  dataKey="perm"
+                  name="Permanentes"
+                  stackId="a"
+                  fill={MX.vino}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
             </ResponsiveContainer>
           </Card>
         )}
@@ -4043,203 +4073,153 @@ function TabIMSS({ isMobile }) {
         isMobile={isMobile}
       >
         {g2 === "urb" && (
+          // ⚠️  Barras apiladas: perm_urb (vino) + ev_urb (rosa) | datos anuales enero
+          // ⚠️  Dominio Y: [0, 480000] = 480 mil
           <Card
             title="Zona Urbana — Permanentes y Eventuales"
             isMobile={isMobile}
             style={{ width: "100%" }}
           >
-            <ResponsiveContainer width="100%" height={isMobile ? 200 : 240}>
-              <ComposedChart
-                data={dataUrb}
+            <ResponsiveContainer width="100%" height={isMobile ? 230 : 280}>
+              <BarChart
+                data={dataUrbAnual}
+                barCategoryGap="22%"
                 margin={{
                   left: isMobile ? 4 : 14,
-                  right: isMobile ? 4 : 20,
-                  top: 5,
+                  right: isMobile ? 4 : 14,
+                  top: 16,
                   bottom: 0,
                 }}
               >
-                <defs>
-                  <linearGradient id="grdPermUrb" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={MX.vino} stopOpacity={0.08} />
-                    <stop
-                      offset="100%"
-                      stopColor={MX.vino}
-                      stopOpacity={0.01}
-                    />
-                  </linearGradient>
-                  <linearGradient id="grdEvUrb" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={MX.rosa} stopOpacity={0.25} />
-                    <stop
-                      offset="100%"
-                      stopColor={MX.rosa}
-                      stopOpacity={0.02}
-                    />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#F0E8EC"
+                  vertical={false}
+                />
                 <XAxis
-                  dataKey="p"
-                  tick={axTick({ fontSize: isMobile ? 7 : 8 })}
+                  dataKey="anio"
+                  tick={axTick({ fontSize: isMobile ? 8 : 9 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={xTickIMSS}
-                  interval={0}
+                  interval={isMobile ? 1 : 0}
                 />
                 <YAxis
                   tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                  domain={[0, 430000]}
-                  width={isMobile ? 30 : 40}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                  domain={[0, 480000]}
+                  width={isMobile ? 38 : 52}
                 />
                 <Tooltip content={<TtUrb />} />
-                <Legend iconType="circle" iconSize={7} formatter={legFmt} />
-                <Area
-                  type="monotone"
-                  dataKey="perm_urb"
-                  fill="url(#grdPermUrb)"
-                  stroke="none"
-                  legendType="none"
+                <Legend
+                  iconType="circle"
+                  iconSize={7}
+                  formatter={legFmt}
+                  payload={[
+                    {
+                      value: "Permanentes Urbanos",
+                      type: "circle",
+                      color: MX.vino,
+                    },
+                    {
+                      value: "Eventuales Urbanos",
+                      type: "circle",
+                      color: MX.rosa,
+                    },
+                  ]}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="ev_urb"
-                  fill="url(#grdEvUrb)"
-                  stroke="none"
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="perm_urb"
-                  name="Permanentes Urbanos"
-                  stroke={MX.vino}
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                    fill: MX.vino,
-                    stroke: MX.white,
-                    strokeWidth: 2,
-                  }}
-                />
-                <Line
-                  type="monotone"
+                <Bar
                   dataKey="ev_urb"
                   name="Eventuales Urbanos"
-                  stroke={MX.rosa}
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                    fill: MX.rosa,
-                    stroke: MX.white,
-                    strokeWidth: 2,
-                  }}
-                  strokeDasharray="5 3"
+                  stackId="b"
+                  fill={MX.rosa}
+                  radius={[0, 0, 0, 0]}
                 />
-              </ComposedChart>
+                <Bar
+                  dataKey="perm_urb"
+                  name="Permanentes Urbanos"
+                  stackId="b"
+                  fill={MX.vino}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
             </ResponsiveContainer>
           </Card>
         )}
 
         {g2 === "campo" && (
+          // ⚠️  Barras apiladas: perm_campo (vino) + ev_campo (rosa) | datos anuales enero
+          // ⚠️  Dominio Y: [0, 70000] = 70 mil
           <Card
             title="Zona Campo — Permanentes y Eventuales"
             isMobile={isMobile}
             style={{ width: "100%" }}
           >
-            <ResponsiveContainer width="100%" height={isMobile ? 200 : 240}>
-              <ComposedChart
-                data={dataEvCampo}
+            <ResponsiveContainer width="100%" height={isMobile ? 230 : 280}>
+              <BarChart
+                data={dataCampoAnual}
+                barCategoryGap="22%"
                 margin={{
                   left: isMobile ? 4 : 14,
-                  right: isMobile ? 4 : 20,
-                  top: 5,
+                  right: isMobile ? 4 : 14,
+                  top: 16,
                   bottom: 0,
                 }}
               >
-                <defs>
-                  <linearGradient id="grdPermCampo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={MX.vino} stopOpacity={0.08} />
-                    <stop
-                      offset="100%"
-                      stopColor={MX.vino}
-                      stopOpacity={0.01}
-                    />
-                  </linearGradient>
-                  <linearGradient id="grdEvCampo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={MX.rosa} stopOpacity={0.25} />
-                    <stop
-                      offset="100%"
-                      stopColor={MX.rosa}
-                      stopOpacity={0.02}
-                    />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0E8EC" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#F0E8EC"
+                  vertical={false}
+                />
                 <XAxis
-                  dataKey="p"
-                  tick={axTick({ fontSize: isMobile ? 7 : 8 })}
+                  dataKey="anio"
+                  tick={axTick({ fontSize: isMobile ? 8 : 9 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={xTickIMSS}
-                  interval={0}
+                  interval={isMobile ? 1 : 0}
                 />
                 <YAxis
                   tick={axTick({ fontSize: isMobile ? 7 : 8 })}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                  domain={[0, 40000]}
-                  width={isMobile ? 30 : 40}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)} mil`}
+                  domain={[0, 70000]}
+                  width={isMobile ? 38 : 52}
                 />
                 <Tooltip content={<TtCampo />} />
-                <Legend iconType="circle" iconSize={7} formatter={legFmt} />
-                <Area
-                  type="monotone"
-                  dataKey="perm_campo"
-                  fill="url(#grdPermCampo)"
-                  stroke="none"
-                  legendType="none"
+                <Legend
+                  iconType="circle"
+                  iconSize={7}
+                  formatter={legFmt}
+                  payload={[
+                    {
+                      value: "Permanentes Campo",
+                      type: "circle",
+                      color: MX.vino,
+                    },
+                    {
+                      value: "Eventuales Campo",
+                      type: "circle",
+                      color: MX.rosa,
+                    },
+                  ]}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="ev_campo"
-                  fill="url(#grdEvCampo)"
-                  stroke="none"
-                  legendType="none"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="perm_campo"
-                  name="Permanentes Campo"
-                  stroke={MX.vino}
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                    fill: MX.vino,
-                    stroke: MX.white,
-                    strokeWidth: 2,
-                  }}
-                />
-                <Line
-                  type="monotone"
+                <Bar
                   dataKey="ev_campo"
                   name="Eventuales Campo"
-                  stroke={MX.rosa}
-                  strokeWidth={2.5}
-                  dot={false}
-                  activeDot={{
-                    r: 5,
-                    fill: MX.rosa,
-                    stroke: MX.white,
-                    strokeWidth: 2,
-                  }}
-                  strokeDasharray="5 3"
+                  stackId="c"
+                  fill={MX.rosa}
+                  radius={[0, 0, 0, 0]}
                 />
-              </ComposedChart>
+                <Bar
+                  dataKey="perm_campo"
+                  name="Permanentes Campo"
+                  stackId="c"
+                  fill={MX.vino}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
             </ResponsiveContainer>
           </Card>
         )}
