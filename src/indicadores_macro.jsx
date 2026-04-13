@@ -1076,6 +1076,7 @@ const IMSS_PT_TOTAL = [
   { p: "Dic 25", tot: 496049 },
   { p: "Ene 26", tot: 499842 },
   { p: "Feb 26", tot: 501402 },
+  { p: "Mar 26", tot: 505642 },
 ];
 const IMSS_PT_PERM = [
   { p: "Ene 16", perm: 319312 },
@@ -1200,6 +1201,7 @@ const IMSS_PT_PERM = [
   { p: "Dic 25", perm: 416572 },
   { p: "Ene 26", perm: 417607 },
   { p: "Feb 26", perm: 418350 },
+  { p: "Mar 26", perm: 422289 },
 ];
 const IMSS_PT_EV = [
   { p: "Ene 16", ev: 64453 },
@@ -1324,6 +1326,7 @@ const IMSS_PT_EV = [
   { p: "Dic 25", ev: 79477 },
   { p: "Ene 26", ev: 82235 },
   { p: "Feb 26", ev: 83052 },
+  { p: "Mar 26", ev: 83353 },
 ];
 const IMSS_PT_EV_CAMPO = [
   { p: "Ene 16", ev_campo: 16637 },
@@ -1448,6 +1451,7 @@ const IMSS_PT_EV_CAMPO = [
   { p: "Dic 25", ev_campo: 23787 },
   { p: "Ene 26", ev_campo: 25470 },
   { p: "Feb 26", ev_campo: 25104 },
+  { p: "Mar 26", ev_campo: 24201 },
 ];
 const IMSS_PT_EV_URB = [
   { p: "Ene 16", ev_urb: 47816 },
@@ -1572,6 +1576,7 @@ const IMSS_PT_EV_URB = [
   { p: "Dic 25", ev_urb: 55690 },
   { p: "Ene 26", ev_urb: 56765 },
   { p: "Feb 26", ev_urb: 57948 },
+  { p: "Mar 26", ev_urb: 59152 },
 ];
 const IMSS_PT_PERM_CAMPO = [
   { p: "Ene 16", perm_campo: 20878 },
@@ -1696,6 +1701,7 @@ const IMSS_PT_PERM_CAMPO = [
   { p: "Dic 25", perm_campo: 29166 },
   { p: "Ene 26", perm_campo: 29442 },
   { p: "Feb 26", perm_campo: 29285 },
+  { p: "Mar 26", perm_campo: 28825 },
 ];
 const IMSS_PT_PERM_URB = [
   { p: "Ene 16", perm_urb: 298434 },
@@ -1820,6 +1826,7 @@ const IMSS_PT_PERM_URB = [
   { p: "Dic 25", perm_urb: 387406 },
   { p: "Ene 26", perm_urb: 388165 },
   { p: "Feb 26", perm_urb: 389065 },
+  { p: "Mar 26", perm_urb: 389065 },
 ];
 
 // ─── SECTORES (ilustrativos) ─────────────────────────────────────────────────
@@ -2623,36 +2630,36 @@ const ENOE_S41_SUBSECTORES = [
 // ════════════════════════════════════════════════════════════════════════════
 const IMSS_SECTORES_ENE26 = [
   {
-    p: "Feb 26",
-    agric: 60013,
-    ind_ext: 1582,
-    transf_1: 54286,
-    transf_2: 27675,
-    construccion: 32701,
-    electrica: 5490,
-    comercio: 124061,
-    transportes: 28141,
-    serv_empresas: 65004,
-    serv_soc: 102449,
+    p: "Mar 26",
+    agric: 58811,
+    ind_ext: 1604,
+    transf_1: 54958,
+    transf_2: 28129,
+    construccion: 33009,
+    electrica: 5618,
+    comercio: 124445,
+    transportes: 27358,
+    serv_empresas: 68887,
+    serv_soc: 102823,
   },
 ];
 
 const IMSS_GRANDES_ENE26 = [
-  { p: "Feb 26", primario: 60013, secundario: 121734, terciario: 319655 },
+  { p: "Mar 26", primario: 58811, secundario: 123318, terciario: 323513 },
 ];
 
-// Top 10 municipios por empleo formal — Febrero 2026 (SBC = Salario Base de Cotización)
+// Top 10 municipios por empleo formal — Marzo 2026 (SBC = Salario Base de Cotización)
 const IMSS_TOP10_MUN = [
-  { municipio: "Morelia",          empleo: 196514, sbc: 589.85 },
-  { municipio: "Uruapan",          empleo:  58570, sbc: 503.75 },
-  { municipio: "Zamora",           empleo:  39898, sbc: 500.48 },
-  { municipio: "Lázaro Cárdenas", empleo:  38117, sbc: 747.17 },
-  { municipio: "La Piedad",        empleo:  13732, sbc: 559.57 },
-  { municipio: "Jacona",           empleo:  12564, sbc: 495.37 },
-  { municipio: "Tarímbaro",        empleo:  11921, sbc: 474.50 },
-  { municipio: "Los Reyes",        empleo:  11255, sbc: 458.26 },
-  { municipio: "Zitácuaro",        empleo:  10063, sbc: 527.80 },
-  { municipio: "Tangancícuaro",    empleo:   7951, sbc: 417.24 },
+  { municipio: "Morelia",          empleo: 198029, sbc: 587.52 },
+  { municipio: "Uruapan",          empleo:  58600, sbc: 501.02 },
+  { municipio: "Zamora",           empleo:  39614, sbc: 498.76 },
+  { municipio: "Lázaro Cárdenas", empleo:  37946, sbc: 736.14 },
+  { municipio: "La Piedad",        empleo:  13819, sbc: 548.28 },
+  { municipio: "Jacona",           empleo:  12672, sbc: 501.36 },
+  { municipio: "Tarímbaro",        empleo:  11908, sbc: 478.16 },
+  { municipio: "Los Reyes",        empleo:  11461, sbc: 455.72 },
+  { municipio: "Zitácuaro",        empleo:  10185, sbc: 520.46 },
+  { municipio: "Tangancícuaro",    empleo:   8329, sbc: 404.35 },
 ];
 
 const SEC_E = [
@@ -2665,11 +2672,12 @@ const SEC_E = [
   { s: "Gobierno", v: 1.7, c: "#F2C8DA" },
 ];
 const SEC_I = [
-  { s: "Servicios", v: 37.5, c: "#6B1737" },
-  { s: "Comercio", v: 24.1, c: "#8C2249" },
-  { s: "Manufactura", v: 18.9, c: "#B03560" },
-  { s: "Construcción", v: 11.2, c: "#C8427A" },
-  { s: "Agropecuario", v: 8.3, c: "#D96E9A" },
+  { s: "Servicios", v: 39.4, c: "#6B1737" },
+  { s: "Comercio", v: 24.6, c: "#8C2249" },
+  { s: "Manufactura", v: 16.4, c: "#B03560" },
+  { s: "Agropecuario", v: 11.6, c: "#C8427A" },
+  { s: "Construcción", v: 6.5, c: "#D96E9A" },
+  { s: "Otros", v: 1.5, c: "#E8A0BC" },
 ];
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -3771,7 +3779,7 @@ function GrafTop10Municipios({ isMobile }) {
   return (
     <Card style={{ width: "100%" }} isMobile={isMobile}>
       <div style={{ fontFamily: FONT, fontSize: isMobile ? 10 : 11, fontWeight: 700, color: MX.vino, marginBottom: 12 }}>
-        Top 10 Municipios — Asegurados IMSS (Feb 2026)
+        Top 10 Municipios — Asegurados IMSS (Mar 2026)
       </div>
       <ResponsiveContainer width="100%" height={isMobile ? 300 : 340}>
         <BarChart
@@ -3851,7 +3859,7 @@ function TablaTop10Municipios({ isMobile }) {
   return (
     <Card style={{ width: "100%", overflowX: "auto", padding: 0 }} isMobile={isMobile}>
       <div style={{ padding: isMobile ? "12px 12px 4px" : "14px 16px 6px", fontFamily: FONT, fontSize: isMobile ? 10 : 11, fontWeight: 700, color: MX.vino }}>
-        Top 10 Municipios — Resumen Estadístico (Feb 2026)
+        Top 10 Municipios — Resumen Estadístico (Mar 2026)
       </div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: isMobile ? 9 : 10 }}>
@@ -3962,28 +3970,28 @@ function TabIMSS({ isMobile }) {
     {
       label: "Asegurados Vigentes",
       valor: lastTot,
-      fmt: "k",
+      fmt: "N",
       delta: fmtDelta(lastTot, prevTot),
       dDir: lastTot >= prevTot ? "pos" : "neg",
-      nota: "Puestos de trabajo IMSS (Feb 26)",
+      nota: "Puestos de trabajo IMSS (Mar 26)",
       color: MX.vino,
     },
     {
       label: "Permanentes",
       valor: lastPerm,
-      fmt: "k",
+      fmt: "N",
       delta: fmtDelta(lastPerm, prevPerm),
       dDir: lastPerm >= prevPerm ? "pos" : "neg",
-      nota: "Trabajadores con contrato permanente",
+      nota: "Trabajadores con contrato permanente (Mar 26)",
       color: MX.vinoMid,
     },
     {
       label: "Eventuales",
       valor: lastEv,
-      fmt: "k",
+      fmt: "N",
       delta: fmtDelta(lastEv, prevEv),
       dDir: lastEv >= prevEv ? "pos" : "neg",
-      nota: "Eventuales campo + urbano",
+      nota: "Eventuales campo + urbano (Mar 26)",
       color: MX.rosa,
     },
     {
@@ -3992,7 +4000,7 @@ function TabIMSS({ isMobile }) {
       fmt: "pct",
       delta: `${((lastPerm / lastTot) * 100 - (prevPerm / prevTot) * 100).toFixed(1)} pp`,
       dDir: (lastPerm / lastTot) >= (prevPerm / prevTot) ? "pos" : "neg",
-      nota: "Proporción de trabajadores permanentes (Feb 26)",
+      nota: "Proporción de trabajadores permanentes (Mar 26)",
       color: MX.vino,
     },
   ];
@@ -4036,7 +4044,7 @@ function TabIMSS({ isMobile }) {
 
   // ── Puestos de Trabajo — pestaña "anual" ────────────────────────────────
   const barData = filterIMSS(IMSS_PT_TOTAL)
-    .filter((d) => d.p === "Feb 26" || (d.p.startsWith("Ene") && d.p !== "Ene 26"))
+    .filter((d) => d.p === "Mar 26" || (d.p.startsWith("Ene") && d.p !== "Ene 26"))
     .map((d) => ({ ...d, anio: "20" + d.p.slice(-2) }));
 
   // ⚠️  renderLabel: etiqueta sobre cada barra del Total Anual
@@ -4066,7 +4074,7 @@ function TabIMSS({ isMobile }) {
   // ⚠️  Todas las gráficas de la sección IMSS usan datos anuales (enero)
   const toAnual = (arr) =>
     arr
-      .filter((d) => d.p === "Feb 26" || (d.p.startsWith("Ene") && d.p !== "Ene 26"))
+      .filter((d) => d.p === "Mar 26" || (d.p.startsWith("Ene") && d.p !== "Ene 26"))
       .map((d) => ({ ...d, anio: "20" + d.p.slice(-2) }));
 
   const compDataAnual = toAnual(
@@ -4275,7 +4283,7 @@ function TabIMSS({ isMobile }) {
       {/* ── Sección 2 · Concentración Municipal del Empleo Formal ──────────── */}
       <Section
         title="Concentración Municipal del Empleo Formal"
-        sub="IMSS · Feb 2026"
+        sub="IMSS · Marzo 2026"
         options={[
           { id: "barras", label: "Distribución por Municipio" },
           { id: "tabla",  label: "Resumen Estadístico" },
@@ -4747,7 +4755,7 @@ function TabSectores({ isMobile }) {
           title={
             pie === "enoe"
               ? `ENOE — Trabajadores subordinados y remunerados por sector (${perValid})`
-              : "IMSS — Asegurados por gran sector (Ene 26)"
+              : "IMSS — Asegurados por gran sector (Marzo 2026)"
           }
           isMobile={isMobile}
           style={{ width: "100%" }}
@@ -4864,7 +4872,7 @@ function TabSectores({ isMobile }) {
             >
               {bar === "enoe"
                 ? "ENOE — Trabajadores subordinados y remunerados por subsector"
-                : "IMSS — Asegurados por rama de actividad (Ene 26)"}
+                : "IMSS — Asegurados por rama de actividad (Marzo 2026)"}
             </div>
             {bar === "enoe" && (
               <div
@@ -5098,7 +5106,7 @@ export default function App() {
           <div
             style={{
               fontSize: isMobile ? 10 : 11,
-              fontWeight: 700,
+              fontWeight: 400,
               color: MX.vino,
               background: MX.crema,
               border: `1px solid ${MX.border}`,
@@ -5107,7 +5115,23 @@ export default function App() {
               textAlign: "center",
             }}
           >
-            Febrero 2026
+            ENOE - Febrero 2026
+          </div>
+
+          <div
+            style={{
+              fontSize: isMobile ? 10 : 11,
+              fontWeight: 400,
+              color: MX.vino,
+              background: MX.crema,
+              border: `1px solid ${MX.border}`,
+              borderRadius: 6,
+              padding: isMobile ? "4px 10px" : "4px 14px",
+              textAlign: "center",
+              marginTop: 4,   // ← esta línea
+            }}
+          >
+            IMSS - Marzo 2026
           </div>
         </div>
       </div>
